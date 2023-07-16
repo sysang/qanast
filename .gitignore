@@ -1,6 +1,10 @@
 .env
 
 .ipynb_checkpoints/
+__pycache__
 tags
+
+assistant__2nb__.ipynb
+askLangchain__2nb__.ipynb
 
 

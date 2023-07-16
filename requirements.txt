@@ -1,3 +1,9 @@
 openai~=0.27.8
 python-dotenv~=1.0.0
 langchain~=0.0.234
+requests~=2.31.0
+beautifulsoup4~=4.12.2
+unstructured~=0.8.1
+nltk~=3.8.1
+tiktoken~=0.4.0
+faiss-cpu~=1.7.4
