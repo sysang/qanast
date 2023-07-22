@@ -7,3 +7,5 @@ unstructured~=0.8.1
 nltk~=3.8.1
 tiktoken~=0.4.0
 faiss-cpu~=1.7.4
+typesense~=0.15.1
+arrow~=1.2.3

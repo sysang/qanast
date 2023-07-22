@@ -3,8 +3,11 @@
 .ipynb_checkpoints/
 __pycache__
 tags
+tmp/
+my-crawler/
+typesense-data/
 
-assistant__2nb__.ipynb
+plan_and_execute_agent__2nb__.ipynb
 askLangchain__2nb__.ipynb
 
 
