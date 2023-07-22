@@ -61,6 +61,7 @@ from langchain.callbacks.manager import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
+from langchain.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
 
 
 load_dotenv()
@@ -89,7 +90,11 @@ current_date_time_tool.run(tool_input={'query': None})
 ```
 
 ```python
-search = SerpAPIWrapper()
+search = DuckDuckGoSearchAPIWrapper()
+search.run("Leo DiCaprio's girlfriend current age")
+```
+
+```python
 llm = OpenAI(temperature=0)
 llm_math_chain = LLMMathChain.from_llm(llm=llm, verbose=True)
 tools = [
