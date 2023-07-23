@@ -1,13 +1,17 @@
 .env
-
 .ipynb_checkpoints/
+
+node_modules/
 __pycache__
 tags
 tmp/
-my-crawler/
+my-crawler/node_modules/
+my-crawler/storage/
 typesense-data/
+meili_data/
 
 plan_and_execute_agent__2nb__.ipynb
 askLangchain__2nb__.ipynb
+movies.json
 
 
