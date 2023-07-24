@@ -13,24 +13,33 @@ enum SchemaTypes {
 }
 
 class Extractor {
-    private metadata;
-    private jsonldData;
+    public businessType = 'ecommerce'
+    private semanticSources = [];
 
     constructor(private request: Request<Dictionary>, private $: CheerioAPI) {}
 
     public run = async () => {
-        this.metadata = await this.getMetadata();
+        this.metascraperData = await this.fromMetadata();
         this.jsonldData = this.fromJsonld(SchemaTypes.Product);
 
-        return {
+        const productData = this.getProductData();
+        console.log('metascraperData: ', this.metascraperData);
+
+        const data = {
             url: this.getUrl(),
             title: this.getTitle(),
             description: this.getDescription(),
-            image: this.getImage(),
         }
+
+        return { ...data, ...productData }
     }
 
-    public getMetadata = async () => {
+    public gatherSemanticSources = () => {
+        this.fromMetadata();
+        this.fromJsonld();
+    }
+
+    public fromMetadata = async () => {
         const url = this.request.url;
         const html = this.$.html();
         const rules = [
@@ -47,11 +56,35 @@ class Extractor {
             });
         })
     
-        return result;
+        this.semanticSources.push(result);
+    }
+
+    public getDataFromSemanticWeb = (name, synonym) => {
+        let names;
+        if(Array.isArray(synonym)) {
+            names = [ name, ...synonym ]
+        } else {
+            names = [ name ]
+        }
+
+        let value;
+        for (let _name of names) {
+            for (let source of this.semanticSources) {
+                value = source[name];
+                if(value) {
+                    break
+                }
+            }
+            if(value) {
+                break
+            }
+        }
+
+        return value;
     }
 
     public getUrl = (): string => {
-        let url = this.metadata['url'];
+        let url = this.getDataFromSemanticWeb('url');
 
         if (!url) {
             url = this.request.url
@@ -61,18 +94,35 @@ class Extractor {
     }
 
     public getTitle = (): string => {
-        let title = this.metadata['title'];
-        return title;
+        return this.getDataFromSemanticWeb('title');
     }
 
     public getDescription = (): string => {
-        let description = this.metadata['description'];
-        return description;
+        return this.getDataFromSemanticWeb('description');
     }
 
     public getImage = (): string => {
-        let image = this.metadata['image'];
-        return image;
+        return this.getDataFromSemanticWeb('image');
+    }
+
+    public getBrand = (): string => {
+        return this.getDataFromSemanticWeb('brand');
+    }
+
+    public getCategory = (): string => {
+        return this.getDataFromSemanticWeb('category');
+    }
+
+    public getProductData = (): Product => {
+        const image = this.getImage();
+        const brand = this.getBrand();
+        const category = this.getCategory();
+
+        return {
+            image,
+            brand,
+            category,
+        }
     }
 
     public fromJsonld = (type: SchemaTypes) => {
@@ -95,7 +145,9 @@ class Extractor {
             }
         })
 
-        return jsonld[0]
+        if (jsonld && jsonld[0]) {
+            this.semanticSources.push(jsonld[0])
+        }
     }
 }
 
