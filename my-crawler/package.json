@@ -12,6 +12,7 @@
         "metascraper-description": "^5.34.9",
         "metascraper-image": "^5.34.9",
         "metascraper-title": "^5.34.9",
+        "node-postal": "^1.1.2",
         "playwright": "*",
         "schema-dts": "^1.1.2"
     },

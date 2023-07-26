@@ -36,7 +36,7 @@ const crawler = new CheerioCrawler({
 
         const extractor = new Extractor(request, $);
         const data = await extractor.run()
-        console.log(data)
+        console.log('data: ', data)
 
         // Store the results to the dataset. In local configuration,
         // the data will be stored as JSON files in ./storage/datasets/default

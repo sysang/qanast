@@ -12,31 +12,59 @@ enum SchemaTypes {
     Product = 'Product',
 }
 
+enum BusinessType {
+    Ecommerce = 'ecommerce',
+}
+
 class Extractor {
-    public businessType = 'ecommerce'
-    private semanticSources = [];
+    public businessType = BusinessType.Ecommerce;
+    private semanticSources = {};
 
     constructor(private request: Request<Dictionary>, private $: CheerioAPI) {}
 
     public run = async () => {
-        this.metascraperData = await this.fromMetadata();
-        this.jsonldData = this.fromJsonld(SchemaTypes.Product);
+        await this.gatherSemanticSources();
 
         const productData = this.getProductData();
-        console.log('metascraperData: ', this.metascraperData);
 
         const data = {
             url: this.getUrl(),
             title: this.getTitle(),
             description: this.getDescription(),
-        }
+        };
 
-        return { ...data, ...productData }
+        return { ...data, ...productData };
     }
 
-    public gatherSemanticSources = () => {
-        this.fromMetadata();
-        this.fromJsonld();
+    public gatherSemanticSources = async () => {
+        await this.fromMetadata();
+        this.fromJsonld(SchemaTypes.Product);
+        console.log('semanticSources: ', this.semanticSources);
+    }
+
+    public fromJsonld = (type: SchemaTypes) => {
+        const self = this;
+        const jsonld: Product[] = [];
+        this.$('script[type=application/ld+json]').each((index, el) => {
+            const text = self.$(el).text();
+            if (!text) {
+                return;
+            }
+
+            try {
+                const data = JSON.parse(text)[0];
+                if (data['@type'] !== type) {
+                    return;
+                }
+                jsonld.push(data as Product);
+            } catch (e) {
+                return;
+            }
+        });
+
+        if (jsonld && jsonld[0]) {
+            this.semanticSources['jsonld'] = jsonld[0];
+        }
     }
 
     public fromMetadata = async () => {
@@ -51,32 +79,33 @@ class Extractor {
         ]
 
         const result = await new Promise((resolve, reject) => {
-            metascraper(rules)({ html,  url }).then((data) => {
-                resolve(data)
+            metascraper(rules)({ html, url }).then((data) => {
+                resolve(data);
             });
         })
     
-        this.semanticSources.push(result);
+        this.semanticSources['metadata'] = result;
     }
 
     public getDataFromSemanticWeb = (name, synonym) => {
         let names;
         if(Array.isArray(synonym)) {
-            names = [ name, ...synonym ]
+            names = [ name, ...synonym ];
         } else {
-            names = [ name ]
+            names = [ name ];
         }
 
+        const semanticSources = Object.values(this.semanticSources);
         let value;
         for (let _name of names) {
-            for (let source of this.semanticSources) {
+            for (let source of semanticSources) {
                 value = source[name];
                 if(value) {
-                    break
+                    break;
                 }
             }
             if(value) {
-                break
+                break;
             }
         }
 
@@ -87,18 +116,22 @@ class Extractor {
         let url = this.getDataFromSemanticWeb('url');
 
         if (!url) {
-            url = this.request.url
+            url = this.request.url;
         }
 
-        return url
+        return url;
     }
 
     public getTitle = (): string => {
-        return this.getDataFromSemanticWeb('title');
+        let title = this.getDataFromSemanticWeb('title');
+        title = title ?? '';
+        return title;
     }
 
     public getDescription = (): string => {
-        return this.getDataFromSemanticWeb('description');
+        let description = this.getDataFromSemanticWeb('description');
+        description = description ?? '';
+        return description;
     }
 
     public getImage = (): string => {
@@ -106,47 +139,74 @@ class Extractor {
     }
 
     public getBrand = (): string => {
-        return this.getDataFromSemanticWeb('brand');
+        let brand = this.getDataFromSemanticWeb('brand');
+
+        if (!brand) {
+            return '';
+        }
+
+        if (brand['@type']) {
+           return brand['name'];
+        }
+        
+        return String(brand);
     }
 
     public getCategory = (): string => {
-        return this.getDataFromSemanticWeb('category');
+        let category = this.getDataFromSemanticWeb('category');
+        category ?? '';
+        return category;
+    }
+
+    public getPrice = (): number | null => {
+        let price;
+        const jsonld = this.semanticSources['jsonld'];
+        price = jsonld.offers?.price;
+
+        if (!price) {
+            price = this.getDataFromSemanticWeb('price');
+        }
+
+        price ?? null; 
+
+        return price;
+    }
+
+    public getPriceCurrency = (): string => {
+        let currency; 
+        const jsonld = this.semanticSources['jsonld'];
+        currency = jsonld.offers?.priceCurrency;
+
+        if (!currency) {
+            currency = this.getDataFromSemanticWeb('priceCurrency', ['currency']);
+        }
+
+        currency ?? '';
+
+        return currency;
+    }
+
+    public getAvailability = (): number | string | null => {
+        let availability = this.getDataFromSemanticWeb('availability');
+        availability ?? null;
+        return availability;
     }
 
     public getProductData = (): Product => {
         const image = this.getImage();
         const brand = this.getBrand();
         const category = this.getCategory();
+        const price = this.getPrice();
 
         return {
-            image,
-            brand,
-            category,
-        }
-    }
-
-    public fromJsonld = (type: SchemaTypes) => {
-        const self = this;
-        const jsonld: Product[] = [];
-        self.$('script[type=application/ld+json]').each((index, el) => {
-            const text = self.$(el).text()
-            if (!text) {
-                return;
+            image: this.getImage(),
+            brand: this.getBrand(),
+            category: this.getCategory(),
+            offers: {
+                price: this.getPrice(),
+                priceCurrency: this.getPriceCurrency(),
+                availability: this.getAvailability(),
             }
-
-            try {
-                const data = JSON.parse(text)[0];
-                if (data['@type'] !== type) {
-                    return
-                }
-                jsonld.push(data as Product)
-            } catch {
-                return;
-            }
-        })
-
-        if (jsonld && jsonld[0]) {
-            this.semanticSources.push(jsonld[0])
         }
     }
 }
