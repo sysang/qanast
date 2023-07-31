@@ -9,3 +9,6 @@ tiktoken~=0.4.0
 faiss-cpu~=1.7.4
 typesense~=0.15.1
 arrow~=1.2.3
+newspaper3k~=0.2.8
+grpcio~=1.56.2
+grpcio-tools~=1.56.2

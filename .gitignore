@@ -9,6 +9,8 @@ my-crawler/node_modules/
 my-crawler/storage/
 typesense-data/
 meili_data/
+python_services/examples/
+my-crawler/examples/
 
 plan_and_execute_agent__2nb__.ipynb
 askLangchain__2nb__.ipynb

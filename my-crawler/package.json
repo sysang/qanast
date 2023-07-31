@@ -4,6 +4,7 @@
     "type": "module",
     "description": "This is an example of a Crawlee project.",
     "dependencies": {
+        "@grpc/grpc-js": "^1.8.21",
         "@samirrayani/metascraper-shopping": "^1.4.22",
         "crawlee": "^3.0.0",
         "memoize-one": "^6.0.0",
@@ -14,7 +15,8 @@
         "metascraper-title": "^5.34.9",
         "node-postal": "^1.1.2",
         "playwright": "*",
-        "schema-dts": "^1.1.2"
+        "schema-dts": "^1.1.2",
+        "zeromq": "^6.0.0-beta.17"
     },
     "devDependencies": {
         "@apify/tsconfig": "^0.1.0",

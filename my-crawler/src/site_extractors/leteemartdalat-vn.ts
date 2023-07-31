@@ -33,7 +33,12 @@ class Extractor {
             description: this.getDescription(),
         };
 
-        return { ...data, ...productData };
+        const raw = {
+            html: this.$.html(),
+            text: this.$.text(),
+        }
+
+        return { ...data, ...productData, ...raw };
     }
 
     public gatherSemanticSources = async () => {
