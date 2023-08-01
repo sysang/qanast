@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package newspaper;
+
+service Newspaper {
+    rpc Parse(NewspaperRequest) returns (NewspaperReply) {}
+}
+
+// The request message containing the user's name.
+message NewspaperRequest {
+  string html = 1;
+}
+
+// The response message containing the greetings
+message NewspaperReply {
+  string content = 1;
+}
