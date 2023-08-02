@@ -8,6 +8,10 @@ import make_image_rule from 'metascraper-image';
 import make_date_rule from 'metascraper-date';
 import make_shopping_rule from '@samirrayani/metascraper-shopping';
 
+import parseHtml from '../grpc_services/newspaper.js';
+import { removeBreaklineCharacters } from '../text_utils.ts';
+import { hashText } from '../text_utils.ts';
+
 enum SchemaTypes {
     Product = 'Product',
 }
@@ -33,9 +37,13 @@ class Extractor {
             description: this.getDescription(),
         };
 
+        const html = this.$.html();
+        const parsed = await parseHtml(html);
+        const content = removeBreaklineCharacters(parsed.content);
+
         const raw = {
-            html: this.$.html(),
-            text: this.$.text(),
+            content: content,
+            hashed: hashText(content),
         }
 
         return { ...data, ...productData, ...raw };
@@ -44,7 +52,6 @@ class Extractor {
     public gatherSemanticSources = async () => {
         await this.fromMetadata();
         this.fromJsonld(SchemaTypes.Product);
-        console.log('semanticSources: ', this.semanticSources);
     }
 
     public fromJsonld = (type: SchemaTypes) => {
