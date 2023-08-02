@@ -36,13 +36,16 @@ const crawler = new CheerioCrawler({
 
         const extractor = new Extractor(request, $);
         const data = await extractor.run()
-        console.log('data: ', data)
 
         // Store the results to the dataset. In local configuration,
         // the data will be stored as JSON files in ./storage/datasets/default
         if (data) {
             await Dataset.pushData(data);
         }
+
+        // Extract links from the current page
+        // and add them to the crawling queue.
+        await enqueueLinks();
     },
 
     // This function is called if the page processing failed more than maxRequestRetries + 1 times.
@@ -53,7 +56,7 @@ const crawler = new CheerioCrawler({
 
 // Run the crawler and wait for it to finish.
 await crawler.run([
-    'https://leteemartdalat.vn/san-pham/nuoc-uong-tinh-chat-nhau-thai-royal-placenta-500-000mg-720ml-kL2YOgKJjPr',
+    'https://leteemartdalat.vn',
 ]);
 
 log.debug('Crawler finished.');
