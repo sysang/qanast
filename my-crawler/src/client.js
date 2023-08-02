@@ -24,7 +24,7 @@ import protoLoader from '@grpc/proto-loader';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const PROTO_PATH = __dirname + '/helloworld.proto';
+const PROTO_PATH = __dirname + '/../../grpc_protos/helloworld.proto';
 
 const packageDefinition = protoLoader.loadSync(
   PROTO_PATH,
@@ -48,7 +48,8 @@ function main() {
   if (argv.target) {
     target = argv.target;
   } else {
-    target = 'localhost:50051';
+    // target = 'localhost:50051';
+    target = 'unix:/tmp/newspaper.sock';
   }
 
   const client = new hello_proto.Greeter(

@@ -17,8 +17,13 @@ import asyncio
 import logging
 
 import grpc
+
 import helloworld_pb2
 import helloworld_pb2_grpc
+import newspaper_pb2
+import newspaper_pb2_grpc
+
+from newspaper import Article
 
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
@@ -29,10 +34,24 @@ class Greeter(helloworld_pb2_grpc.GreeterServicer):
         return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
 
 
+class Newspaper():
+
+    async def Parse(
+            self, request: newspaper_pb2.NewspaperRequest,
+            context: grpc.aio.ServicerContext) -> newspaper_pb2.NewspaperReply:
+        article = Article(url='', language='vi')
+        article.set_html(request.html)
+        article.parse()
+
+        return newspaper_pb2.NewspaperReply(content=article.text)
+
+
 async def serve() -> None:
     server = grpc.aio.server()
     helloworld_pb2_grpc.add_GreeterServicer_to_server(Greeter(), server)
-    listen_addr = '[::]:50051'
+    newspaper_pb2_grpc.add_NewspaperServicer_to_server(Newspaper(), server)
+    # listen_addr = '[::]:50051'
+    listen_addr = 'unix:/tmp/newspaper.sock'
     server.add_insecure_port(listen_addr)
     logging.info("Starting server on %s", listen_addr)
     await server.start()
