@@ -1,16 +1,17 @@
-import { CheerioAPI, Request } from 'cheerio';
+import { CheerioAPI } from 'cheerio';
+import { Request } from 'crawlee';
+import type { Dictionary } from '@crawlee/types';
 import { Product } from 'schema-dts';
-import memoizeOne from 'memoize-one';
 import metascraper from 'metascraper';
 import make_title_rule from 'metascraper-title';
 import make_description_rule from 'metascraper-description';
 import make_image_rule from 'metascraper-image';
 import make_date_rule from 'metascraper-date';
-import make_shopping_rule from '@samirrayani/metascraper-shopping';
+// import make_shopping_rule from '@samirrayani/metascraper-shopping';
 
-import parseHtml from '../grpc_services/newspaper.js';
-import { removeBreaklineCharacters } from '../text_utils.ts';
-import { hashText } from '../text_utils.ts';
+import { parseHtml } from '../grpc_services/newspaper';
+import { removeBreaklineCharacters } from '../text_utils';
+import { hashText } from '../text_utils';
 
 enum SchemaTypes {
     Product = 'Product',
@@ -24,22 +25,30 @@ class Extractor {
     public businessType = BusinessType.Ecommerce;
     private semanticSources = {};
 
+    // @ts-ignore
     constructor(private request: Request<Dictionary>, private $: CheerioAPI) {}
 
-    public run = async () => {
+    public getData = async (): Promise<any> => {
         await this.gatherSemanticSources();
 
         const productData = this.getProductData();
 
         const data = {
             url: this.getUrl(),
-            title: this.getTitle(),
-            description: this.getDescription(),
+            title: this.getTitle().toLowerCase(),
+            description: this.getDescription().toLowerCase(),
         };
 
+        this.$('head').remove();
+        this.$('header').remove();
+        this.$('footer').remove();
+        this.$('script').remove();
+        this.$('.product-details--side').remove();
         const html = this.$.html();
         const parsed = await parseHtml(html);
-        const content = removeBreaklineCharacters(parsed.content);
+        // @ts-ignore
+        let content = removeBreaklineCharacters(parsed.content);
+        content = content.toLowerCase();
 
         const raw = {
             content: content,
@@ -57,6 +66,7 @@ class Extractor {
     public fromJsonld = (type: SchemaTypes) => {
         const self = this;
         const jsonld: Product[] = [];
+        // @ts-ignore
         this.$('script[type=application/ld+json]').each((index, el) => {
             const text = self.$(el).text();
             if (!text) {
@@ -75,6 +85,7 @@ class Extractor {
         });
 
         if (jsonld && jsonld[0]) {
+            // @ts-ignore
             this.semanticSources['jsonld'] = jsonld[0];
         }
     }
@@ -87,19 +98,21 @@ class Extractor {
             make_description_rule(),
             make_image_rule(),
             make_date_rule(),
-            make_shopping_rule(),
+            // make_shopping_rule(),
         ]
 
+        // @ts-ignore
         const result = await new Promise((resolve, reject) => {
             metascraper(rules)({ html, url }).then((data) => {
                 resolve(data);
             });
         })
     
+        // @ts-ignore
         this.semanticSources['metadata'] = result;
     }
 
-    public getDataFromSemanticWeb = (name, synonym) => {
+    public getDataFromSemanticWeb = (name: string, synonym?: string[]): any => {
         let names;
         if(Array.isArray(synonym)) {
             names = [ name, ...synonym ];
@@ -111,6 +124,7 @@ class Extractor {
         let value;
         for (let _name of names) {
             for (let source of semanticSources) {
+                // @ts-ignore
                 value = source[name];
                 if(value) {
                     break;
@@ -172,8 +186,9 @@ class Extractor {
 
     public getPrice = (): number | null => {
         let price;
+        // @ts-ignore
         const jsonld = this.semanticSources['jsonld'];
-        price = jsonld.offers?.price;
+        price = jsonld?.offers?.price;
 
         if (!price) {
             price = this.getDataFromSemanticWeb('price');
@@ -186,8 +201,9 @@ class Extractor {
 
     public getPriceCurrency = (): string => {
         let currency; 
+        // @ts-ignore
         const jsonld = this.semanticSources['jsonld'];
-        currency = jsonld.offers?.priceCurrency;
+        currency = jsonld?.offers?.priceCurrency;
 
         if (!currency) {
             currency = this.getDataFromSemanticWeb('priceCurrency', ['currency']);
@@ -205,15 +221,11 @@ class Extractor {
     }
 
     public getProductData = (): Product => {
-        const image = this.getImage();
-        const brand = this.getBrand();
-        const category = this.getCategory();
-        const price = this.getPrice();
-
         return {
             image: this.getImage(),
             brand: this.getBrand(),
             category: this.getCategory(),
+            // @ts-ignore
             offers: {
                 price: this.getPrice(),
                 priceCurrency: this.getPriceCurrency(),

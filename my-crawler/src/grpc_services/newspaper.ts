@@ -1,3 +1,4 @@
+// @ts-nocheck
 /*
  *
  * Copyright 2015 gRPC authors.
@@ -19,12 +20,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import parseArgs from 'minimist';
-import grpc from '@grpc/grpc-js';
-import protoLoader from '@grpc/proto-loader';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const PROTO_PATH = __dirname + '/../../../grpc_protos/newspaper.proto';
+// const __filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(__filename);
+const PROTO_PATH = dirname + '/../../../grpc_protos/newspaper.proto';
 
 const packageDefinition = protoLoader.loadSync(
   PROTO_PATH,
@@ -39,7 +40,7 @@ const packageDefinition = protoLoader.loadSync(
 
 const newspaper_proto = grpc.loadPackageDefinition(packageDefinition).newspaper;
 
-const parseHtml = async (html) => {
+export const parseHtml = async (html) => {
   const target = 'unix:/tmp/newspaper.sock';
 
   const client = new newspaper_proto.Newspaper(
@@ -49,12 +50,10 @@ const parseHtml = async (html) => {
   return new Promise((resolve, reject) => {
     client.parse({html: html}, function(err, response) {
       if (err) {
-        return reject(error)
+        return reject(err)
       }
 
       resolve(response);
     });
   })
 }
-
-export default parseHtml;

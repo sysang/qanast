@@ -1,3 +1,4 @@
+// @ts-nocheck
 import XXHash from 'xxhash';
 
 export const removeBreaklineCharacters = (text: string): string => {

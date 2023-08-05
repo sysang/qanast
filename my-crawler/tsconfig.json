@@ -1,13 +1,40 @@
 {
-    "extends": "@apify/tsconfig",
     "compilerOptions": {
-        "module": "ES2022",
-        "target": "ES2022",
-        "outDir": "dist",
-        "noUnusedLocals": false,
-        "lib": ["DOM"]
+        "strict": true,
+        "target": "ES2020",
+        "module": "commonjs",
+        "noImplicitAny": false,
+        "resolveJsonModule": true,
+        "types": [ "node" ],
+        "moduleResolution": "node",
+        "lib": [
+            "ES2015",
+            "ES2016",
+            "ES2017",
+            "ES2018",
+            "ES2019",
+            "ES2020",
+            "DOM"
+        ],
+        "declaration": true,
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "outDir": "build"
     },
     "include": [
-        "./src/**/*"
-    ]
+        "src/**/*.ts",
+        "test/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/node_modules/**",
+        "**/*.spec.*",
+        "**/*.test.*",
+        "./dist/**",
+        "./build/**",
+        "./build-*/**"
+    ],
+    "ts-node": {
+        "transpileOnly": true
+    }
 }
