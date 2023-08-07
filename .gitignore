@@ -11,6 +11,7 @@ typesense-data/
 meili_data/
 python_services/examples/
 my-crawler/examples/
+chiir21_naturallanguagequeries/
 
 plan_and_execute_agent__2nb__.ipynb
 askLangchain__2nb__.ipynb

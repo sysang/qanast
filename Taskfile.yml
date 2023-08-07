@@ -1,0 +1,7 @@
+version: '3'
+
+tasks:
+  meili_api_get_indexes:
+    cmds:
+      - xh http://localhost:7700/indexes
+
