@@ -17,7 +17,9 @@
         "botbuilder-storage-mongodb": "^1.0.17",
         "dotenv": "^8.2.0",
         "mongodb": "^5.7.0",
-        "restify": "~10.0.0"
+        "restify": "~10.0.0",
+        "winston": "^3.10.0",
+        "winston-mongodb": "^5.1.1"
     },
     "devDependencies": {
         "@types/node": "^20.4.10",
