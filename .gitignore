@@ -9,6 +9,7 @@ my-crawler/node_modules/
 my-crawler/storage/
 typesense-data/
 meili_data/
+mongodb_data/
 python_services/examples/
 my-crawler/examples/
 chiir21_naturallanguagequeries/
