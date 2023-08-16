@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const { ComponentDialog, DialogSet, DialogTurnStatus, WaterfallDialog } = require('botbuilder-dialogs');
+const { DialogSet, DialogTurnStatus, WaterfallDialog } = require('botbuilder-dialogs');
 const { TopLevelDialog, TOP_LEVEL_DIALOG } = require('./topLevelDialog');
+
+const MyComponentDialog = require('./component-dialog')
 
 const MAIN_DIALOG = 'MAIN_DIALOG';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const USER_PROFILE_PROPERTY = 'USER_PROFILE_PROPERTY';
 
-class MainDialog extends ComponentDialog {
+class MainDialog extends MyComponentDialog {
     constructor(userState) {
         super(MAIN_DIALOG);
         this.userState = userState;
@@ -24,7 +26,8 @@ class MainDialog extends ComponentDialog {
     }
 
     /**
-     * The run method handles the incoming activity (in the form of a TurnContext) and passes it through the dialog system.
+     * The run method handles the incoming activity (in the form of a TurnContext) 
+     *  and passes it through the dialog system.
      * If no dialog is active, it will start the default dialog.
      * @param {*} turnContext
      * @param {*} accessor
@@ -41,6 +44,7 @@ class MainDialog extends ComponentDialog {
     }
 
     async initialStep(stepContext) {
+        // console.log('stepContext.state: ', stepContext.state);
         return await stepContext.beginDialog(TOP_LEVEL_DIALOG);
     }
 
@@ -51,7 +55,8 @@ class MainDialog extends ComponentDialog {
             (userInfo.companiesToReview.length === 0 ? 'no companies' : userInfo.companiesToReview.join(' and ')) + '.';
         await stepContext.context.sendActivity(status);
         await this.userProfileAccessor.set(stepContext.context, userInfo);
-        return await stepContext.endDialog();
+        return await stepContext.beginDialog(WATERFALL_DIALOG);
+        // return await stepContext.endDialog();
     }
 }
 
