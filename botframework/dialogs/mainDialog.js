@@ -6,13 +6,13 @@ const { TopLevelDialog, TOP_LEVEL_DIALOG } = require('./topLevelDialog');
 
 const MyComponentDialog = require('./component-dialog')
 
-const MAIN_DIALOG = 'MAIN_DIALOG';
+const ROOT_DIALOG = 'ROOT_DIALOG';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 const USER_PROFILE_PROPERTY = 'USER_PROFILE_PROPERTY';
 
 class MainDialog extends MyComponentDialog {
     constructor(userState) {
-        super(MAIN_DIALOG);
+        super(ROOT_DIALOG);
         this.userState = userState;
         this.userProfileAccessor = userState.createProperty(USER_PROFILE_PROPERTY);
 
@@ -44,7 +44,6 @@ class MainDialog extends MyComponentDialog {
     }
 
     async initialStep(stepContext) {
-        // console.log('stepContext.state: ', stepContext.state);
         return await stepContext.beginDialog(TOP_LEVEL_DIALOG);
     }
 
@@ -61,4 +60,3 @@ class MainDialog extends MyComponentDialog {
 }
 
 module.exports.MainDialog = MainDialog;
-module.exports.MAIN_DIALOG = MAIN_DIALOG;

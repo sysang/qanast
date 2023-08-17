@@ -19,7 +19,8 @@ const createAdapter = async () => {
       // NOTE: In production environment, you should consider logging this to Azure
       //       application insights. See https://aka.ms/bottelemetry for telemetry
       //       configuration instructions.
-      console.error(`\n [onTurnError] unhandled error: ${ error }`);
+      console.error(`\n [onTurnError] unhandled error, message: ${ error }`);
+      console.error(`\n [onTurnError] unhandled error, stack: ${ error.stack }`);
 
       // Send a trace activity, which will be displayed in Bot Framework Emulator
       await context.sendTraceActivity(

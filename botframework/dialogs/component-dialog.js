@@ -1,34 +1,28 @@
 const { ComponentDialog } = require('botbuilder-dialogs');
 
-const Queue = require('../queue');
-
 const ROOT_DIALOG = 'ROOT_DIALOG';
 
 class MyComponentDialog extends ComponentDialog {
-  constructor(dialogId, userState, isRootDialog) {
+  constructor(dialogId) {
+    super(dialogId);
+
     this.rootDialogId = ROOT_DIALOG;
     this.chatHistoryStateProperty = 'this.CHAT_HISTORY_PROPERTY';
-    this.historyLength = 10;
-  
-    if (isRootDialog) {
-      super(this.rootDialogId);
-    } else {
-      super(dialogId);
-    }
+    this.historyLength = 20;
   }
 
   initializeHistory() {
     return {
-      event: {};
-      frontIndex: 0;
-      backIndex: 0;
+      events: {},
+      frontIndex: 0,
+      backIndex: 0,
     }
   }
 
   enqueueEvent(dialogContext, event) {
-    let { events, backIndex, frontIndex } = getChatHistoryState(dialogContext);
+    let { events, backIndex, frontIndex } = this.getChatHistoryState(dialogContext);
     events[backIndex] = event;
-    backIndex++
+    backIndex++;
 
     if (backIndex > this.historyLength) {
       delete events[frontIndex]
@@ -40,13 +34,15 @@ class MyComponentDialog extends ComponentDialog {
   }
 
   getRootDialogContext(dialogContext) {
-    let rootContext = dialogContext.parent;
+    let rootContext = dialogContext;
+    let parent = rootContext.parent
     
-    while (rootContext.parent) {
-      rootContext = rootContext.parent;
+    while (parent) {
+      rootContext = parent;
+      parent = parent.parent;
     }
 
-    if (rootContext.activeDialog.id !== this.rootDialogId) {
+    if (rootContext.activeDialog && rootContext.activeDialog.id !== this.rootDialogId) {
       throw new Error(
         'Dialog hierachy is malformed, can not get predefined root dialog id. Call getRootDialogContext() get: ',
         rootContext.activeDialog.id)
@@ -57,11 +53,7 @@ class MyComponentDialog extends ComponentDialog {
 
   getChatHistoryState(dialogContext) {
     const rootContext = this.getRootDialogContext(dialogContext);
-    const history = rootContext.state.getValue(this.chatHistoryStateProperty);
-    if (!history || !history.events) {
-      history = this.initialize();
-      rootContext.state.setValue(this.chatHistoryStateProperty, history);
-    }
+    const history = rootContext.state.getValue(this.chatHistoryStateProperty, this.initializeHistory());
     console.log('history: ', history);
     return history;
   }
@@ -74,6 +66,12 @@ class MyComponentDialog extends ComponentDialog {
   sendActivity(dialogContext, activity) {
     // enqueueEvent();
     dialogContext.sendActivity(activity);
+  }
+
+  continueDialog (dialogContext) {
+    console.log('continueDialog -> ', dialogContext.context.activity.text);
+    this.enqueueEvent(dialogContext, { role: 'user', 'text': dialogContext.context.activity.text });
+    return super.continueDialog(dialogContext);
   }
 }
 
