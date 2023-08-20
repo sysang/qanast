@@ -1,7 +1,8 @@
-.env
-.ipynb_checkpoints/
-
 node_modules/
+dist/
+.env
+
+.ipynb_checkpoints/
 __pycache__
 tags
 tmp/
@@ -12,7 +13,7 @@ meili_data/
 mongodb_data/
 python_services/examples/
 my-crawler/examples/
-chiir21_naturallanguagequeries/
+etc/chiir21_naturallanguagequeries/
 
 plan_and_execute_agent__2nb__.ipynb
 askLangchain__2nb__.ipynb
