@@ -14,22 +14,22 @@ export type UserProfile = {
 
 export class UserDataBinder<T> {
   readonly access_property = USER_PROFILE_PROPERTY;
-  readonly accessor: StatePropertyAccessor<T>;
+  readonly _accessor: StatePropertyAccessor<T>;
   readonly _default: T;
 
   constructor (botState: BotState, initialData: T) {
-    this.accessor = botState.createProperty<T>(this.access_property);
+    this._accessor = botState.createProperty<T>(this.access_property);
     this._default = initialData;
   }
 
   public async get (turnContext: TurnContext): Promise<T> {
-    return await this.accessor.get(turnContext, this._default);
+    return await this._accessor.get(turnContext, this._default);
   }
 
   public async update (turnContext: TurnContext, data: Partial<T>) {
     const stored = await this.get(turnContext);
     const toBeUpdated = { ...stored, ...data }
-    await this.accessor.set(turnContext, toBeUpdated);
+    await this._accessor.set(turnContext, toBeUpdated);
   }
 }
 
