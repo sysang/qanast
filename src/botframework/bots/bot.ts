@@ -9,8 +9,9 @@ import {
   type Storage
 } from 'botbuilder-core';
 
-import { DIALOG_STATE_PROPERTY } from '../constants';
 import RootDialog from '../dialogs/rootDialog';
+
+export const DIALOG_STATE_PROPERTY = 'DIALOG_STATE_PROPERTY';
 
 const createBot = (storage: Storage): MainBot => {
   // Create user and conversation state with in-memory storage provider.

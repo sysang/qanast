@@ -82,7 +82,7 @@ export class ReviewSelectionDialog extends MyComponentDialog {
       return await stepContext.endDialog();
     } else {
       // Otherwise, repeat this dialog, passing in the list from this iteration.
-      return await stepContext.replaceDialog(REVIEW_SELECTION_DIALOG);
+      return await stepContext.replaceDialog(WATERFALL_DIALOG);
     }
   }
 }

@@ -4,6 +4,7 @@ import {
   type TurnContext
 } from 'botbuilder-core';
 import {
+  type DialogContext,
   DialogSet,
   DialogTurnStatus,
   WaterfallDialog,
@@ -13,9 +14,24 @@ import {
 import { TopLevelDialog, TOP_LEVEL_DIALOG } from './topLevelDialog';
 import MyComponentDialog from './my-dialogs';
 
-import { ROOT_DIALOG, WATERFALL_DIALOG } from '../constants';
+const ROOT_DIALOG = 'ROOT_DIALOG';
+const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
+
+type HistoryEventType = {
+  role: 'bot' | 'user';
+  text: string;
+}
+
+type HistoryQueueType = {
+  events: Record<number, HistoryEventType>;
+  frontIndex: number;
+  backIndex: number;
+  readonly historyLength: number;
+}
 
 class RootDialog extends MyComponentDialog {
+  readonly chatHistoryStateProperty = 'this.CHAT_HISTORY_PROPERTY';
+
   constructor (userState: BotState) {
     super(ROOT_DIALOG);
 
@@ -58,7 +74,58 @@ class RootDialog extends MyComponentDialog {
     const status = 'You are signed up to review ' +
         (userProfile.companiesToReview.length === 0 ? 'no companies' : userProfile.companiesToReview.join(' and ')) + '.';
     await stepContext.context.sendActivity(status);
-    return await stepContext.endDialog();
+    return await stepContext.replaceDialog(WATERFALL_DIALOG);
+  }
+
+  public initializeHistory (): HistoryQueueType {
+    return {
+      events: {},
+      frontIndex: 0,
+      backIndex: 0,
+      historyLength: 20
+    }
+  }
+
+  public enqueueEvent (dialogContext: DialogContext, event: HistoryEventType) {
+    let { events, backIndex, frontIndex, historyLength } = this.getChatHistoryState(dialogContext);
+    const _events: HistoryQueueType['events'] = {};
+    events[backIndex] = event;
+    backIndex++;
+
+    if (backIndex > historyLength && events[frontIndex] !== undefined) {
+      frontIndex++;
+      for (let idx = frontIndex; idx < backIndex; idx++) {
+        _events[idx] = events[idx];
+      }
+      dialogContext.state.setValue(this.chatHistoryStateProperty,
+        { _events, backIndex, frontIndex, historyLength });
+    } else {
+      dialogContext.state.setValue(this.chatHistoryStateProperty,
+        { events, backIndex, frontIndex, historyLength });
+    }
+  }
+
+  public getChatHistoryState (dialogContext: DialogContext) {
+    const history = dialogContext.state.getValue(this.chatHistoryStateProperty, this.initializeHistory());
+    console.log('history: ', history);
+    return history;
+  }
+
+  // TODO: enqueueEvent in beginDialog coz this event occurs at second message of user
+  public async continueDialog (dialogContext: DialogContext): Promise<DialogTurnResult> {
+    console.log(`dialog: ${this.id}: continueDialog -> `, dialogContext.context.activity.text);
+    this.enqueueEvent(
+      dialogContext,
+      {
+        role: 'user',
+        text: dialogContext.context.activity.text
+      }
+    );
+    dialogContext.context.onSendActivities(async (context, activities, next) => {
+      console.debug("[DEBUG] onSendActivities -> activities: %s", activities[0].text);
+      return await next();
+    })
+    return await super.continueDialog(dialogContext);
   }
 }
 
