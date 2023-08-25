@@ -1,10 +1,13 @@
+import { ActivityTypes } from 'botframework-schema';
 import {
   type BotState,
+  type SendActivitiesHandler,
   type StatePropertyAccessor,
   type TurnContext
 } from 'botbuilder-core';
 import {
   type DialogContext,
+  type DialogTurnResult,
   DialogSet,
   DialogTurnStatus,
   WaterfallDialog,
@@ -98,7 +101,7 @@ class RootDialog extends MyComponentDialog {
         _events[idx] = events[idx];
       }
       dialogContext.state.setValue(this.chatHistoryStateProperty,
-        { _events, backIndex, frontIndex, historyLength });
+        { events: _events, backIndex, frontIndex, historyLength });
     } else {
       dialogContext.state.setValue(this.chatHistoryStateProperty,
         { events, backIndex, frontIndex, historyLength });
@@ -111,9 +114,7 @@ class RootDialog extends MyComponentDialog {
     return history;
   }
 
-  // TODO: enqueueEvent in beginDialog coz this event occurs at second message of user
-  public async continueDialog (dialogContext: DialogContext): Promise<DialogTurnResult> {
-    console.log(`dialog: ${this.id}: continueDialog -> `, dialogContext.context.activity.text);
+  public async beginDialog (dialogContext: DialogContext): Promise<DialogTurnResult> {
     this.enqueueEvent(
       dialogContext,
       {
@@ -121,11 +122,41 @@ class RootDialog extends MyComponentDialog {
         text: dialogContext.context.activity.text
       }
     );
-    dialogContext.context.onSendActivities(async (context, activities, next) => {
-      console.debug("[DEBUG] onSendActivities -> activities: %s", activities[0].text);
-      return await next();
-    })
+    return await super.beginDialog(dialogContext);
+  }
+
+  public async continueDialog (dialogContext: DialogContext): Promise<DialogTurnResult> {
+    this.enqueueEvent(
+      dialogContext,
+      {
+        role: 'user',
+        text: dialogContext.context.activity.text
+      }
+    );
+
+    dialogContext.context.onSendActivities(this.bindEnqueueEventOnSendActivities(dialogContext));
+
     return await super.continueDialog(dialogContext);
+  }
+
+  public bindEnqueueEventOnSendActivities (dialogContext: DialogContext): SendActivitiesHandler {
+    return async (context, activities, next) => {
+      for (const activity of activities) {
+        if (activity.type !== ActivityTypes.Message || activity.text === undefined) {
+          continue;
+        }
+
+        this.enqueueEvent(
+          dialogContext,
+          {
+            role: 'bot',
+            text: activity.text
+          }
+        );
+      }
+
+      return await next();
+    }
   }
 }
 
