@@ -1,6 +1,6 @@
 openai~=0.27.8
 python-dotenv~=1.0.0
-langchain~=0.0.234
+langchain~=0.0.315
 requests~=2.31.0
 beautifulsoup4~=4.12.2
 unstructured~=0.8.1
