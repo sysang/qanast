@@ -8,17 +8,21 @@ import {
 import {
   type DialogContext,
   type DialogTurnResult,
+  Dialog,
   DialogSet,
   DialogTurnStatus,
+  TextPrompt,
   WaterfallDialog,
   type WaterfallStepContext
 } from 'botbuilder-dialogs';
 
-import { TopLevelDialog, TOP_LEVEL_DIALOG } from './topLevelDialog';
+// import { TopLevelDialog, TOP_LEVEL_DIALOG } from './topLevelDialog';
+import { AgentAsDialog, AGENT_AS_DIALOG } from './agentAsDialog';
 import MyComponentDialog from './my-dialogs';
 
 const ROOT_DIALOG = 'ROOT_DIALOG';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
+const TEXT_PROMPT = 'TEXT_PROMPT';
 
 type HistoryEventType = {
   role: 'bot' | 'user';
@@ -40,9 +44,11 @@ class RootDialog extends MyComponentDialog {
 
     this.initializeUserProfile(userState);
 
-    this.addDialog(new TopLevelDialog(userState));
+    this.addDialog(new TextPrompt(TEXT_PROMPT));
+    this.addDialog(new AgentAsDialog(userState));
     this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
       this.initialStep.bind(this),
+      this.sayThenListenStep.bind(this),
       this.finalStep.bind(this)
     ]));
 
@@ -67,16 +73,21 @@ class RootDialog extends MyComponentDialog {
     }
   }
 
-  async initialStep (stepContext: WaterfallStepContext) {
-    return await stepContext.beginDialog(TOP_LEVEL_DIALOG);
+  async initialStep (stepContext: WaterfallStepContext): Promise<DialogTurnResult> {
+    console.log('[DEBUG] initialStep.')
+    return await stepContext.beginDialog(AGENT_AS_DIALOG);
   }
 
-  async finalStep (stepContext: WaterfallStepContext) {
-    const userProfile = await this.userProfile.get(stepContext.context);
+  async sayThenListenStep (stepContext: WaterfallStepContext) {
+    console.log('[DEBUG] sayThenListenStep.')
+    const promptOptions = { prompt: stepContext.result };
 
-    const status = 'You are signed up to review ' +
-        (userProfile.companiesToReview.length === 0 ? 'no companies' : userProfile.companiesToReview.join(' and ')) + '.';
-    await stepContext.context.sendActivity(status);
+    // Ask the user to enter their name.
+    return await stepContext.prompt(TEXT_PROMPT, promptOptions);
+  }
+
+
+  async finalStep (stepContext: WaterfallStepContext) {
     return await stepContext.replaceDialog(WATERFALL_DIALOG);
   }
 
