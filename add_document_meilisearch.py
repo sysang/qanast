@@ -21,5 +21,6 @@ for file in path_obj.iterdir():
         doc = json.load(json_file)
         doc['id'] = doc['hashed']
         data.append(doc)
+        print(doc['title'])
 
 client.index('leteemartdalat').add_documents(data)
