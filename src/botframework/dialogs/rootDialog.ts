@@ -86,7 +86,6 @@ class RootDialog extends MyComponentDialog {
     return await stepContext.prompt(TEXT_PROMPT, promptOptions);
   }
 
-
   async finalStep (stepContext: WaterfallStepContext) {
     return await stepContext.replaceDialog(WATERFALL_DIALOG);
   }
@@ -121,7 +120,6 @@ class RootDialog extends MyComponentDialog {
 
   public getChatHistoryState (dialogContext: DialogContext) {
     const history = dialogContext.state.getValue(this.chatHistoryStateProperty, this.initializeHistory());
-    console.log('history: ', history);
     return history;
   }
 

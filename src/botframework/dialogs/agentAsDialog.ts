@@ -22,7 +22,7 @@ export class AgentAsDialog extends MyComponentDialog {
   }
 
   async queryLLM (stepContext: WaterfallStepContext) {
-    console.log('[DEBUG] queryLLM.')
+    // console.log('[DEBUG] queryLLM.')
     return await stepContext.endDialog('large language model tokens');
   }
 }
