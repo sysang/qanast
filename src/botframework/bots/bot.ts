@@ -9,7 +9,7 @@ import {
   type Storage
 } from 'botbuilder-core';
 
-import RootDialog from '../dialogs/rootDialog';
+import RootDialog from '../dialogs/root-dialog';
 
 export const DIALOG_STATE_PROPERTY = 'DIALOG_STATE_PROPERTY';
 
