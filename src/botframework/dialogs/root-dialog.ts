@@ -38,6 +38,7 @@ type HistoryQueueType = {
 
 class RootDialog extends MyComponentDialog {
   readonly chatHistoryStateProperty = 'this.CHAT_HISTORY_PROPERTY';
+  private _history: HistoryQueueType['events'] = {};
 
   constructor (userState: BotState) {
     super(ROOT_DIALOG);
@@ -116,6 +117,8 @@ class RootDialog extends MyComponentDialog {
       dialogContext.state.setValue(this.chatHistoryStateProperty,
         { events, backIndex, frontIndex, historyLength });
     }
+
+    return events;
   }
 
   public getChatHistoryState (dialogContext: DialogContext) {
@@ -123,14 +126,24 @@ class RootDialog extends MyComponentDialog {
     return history;
   }
 
+  public setHistory (history: HistoryQueueType['events']) {
+    this._history = history;
+  }
+
+  public getHistory () {
+    return this._history;
+  }
+
   public async beginDialog (dialogContext: DialogContext): Promise<DialogTurnResult> {
-    this.enqueueEvent(
+    const events = this.enqueueEvent(
       dialogContext,
       {
         role: 'user',
         text: dialogContext.context.activity.text
       }
     );
+    this.setHistory(events);
+
     return await super.beginDialog(dialogContext);
   }
 
