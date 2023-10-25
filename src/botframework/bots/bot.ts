@@ -9,7 +9,9 @@ import {
   type Storage
 } from 'botbuilder-core';
 
+import DialogueManager from './dialogue-manager';
 import RootDialog from '../dialogs/root-dialog';
+import { AgentAsDialog } from '../dialogs/agentAsDialog';
 
 export const DIALOG_STATE_PROPERTY = 'DIALOG_STATE_PROPERTY';
 
@@ -19,8 +21,9 @@ const createBot = (storage: Storage): MainBot => {
   const userState = new UserState(storage);
 
   // Create the main dialog.
-  const dialog = new RootDialog(userState);
-  const mainBot = new MainBot(conversationState, userState, dialog);
+  const dialogueManager = new DialogueManager([new AgentAsDialog(userState)]);
+  const rootDialog = new RootDialog(userState, dialogueManager);
+  const mainBot = new MainBot(conversationState, userState, rootDialog);
 
   return mainBot;
 }

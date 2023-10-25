@@ -3,11 +3,13 @@ import {describe, expect, test} from '@jest/globals';
 import { MemoryStorage, UserState, } from 'botbuilder';
 import { DialogTestClient } from 'botbuilder-testing';
 
+import DialogueManager from '../bots/dialogue-manager';
 import RootDialog from './root-dialog';
 
 const storage = new MemoryStorage();
 const userState = new UserState(storage);
-const rootDialog = new RootDialog(userState);
+const dialogueManager = new DialogueManager([]);
+const rootDialog = new RootDialog(userState, dialogueManager);
 const client = new DialogTestClient('test', rootDialog);
 
 describe('RootDialog', () => {

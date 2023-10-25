@@ -8,7 +8,6 @@ import {
 import {
   type DialogContext,
   type DialogTurnResult,
-  Dialog,
   DialogSet,
   DialogTurnStatus,
   TextPrompt,
@@ -16,12 +15,12 @@ import {
   type WaterfallStepContext
 } from 'botbuilder-dialogs';
 
+import DialogueManager from '../bots/dialogue-manager';
 // import { TopLevelDialog, TOP_LEVEL_DIALOG } from './topLevelDialog';
-import { AgentAsDialog, AGENT_AS_DIALOG } from './agentAsDialog';
 import MyComponentDialog from './my-dialogs';
 
 const ROOT_DIALOG = 'ROOT_DIALOG';
-const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
+const MAIN_LOOP = 'MAIN_LOOP';
 const TEXT_PROMPT = 'TEXT_PROMPT';
 
 type HistoryEventType = {
@@ -39,21 +38,28 @@ type HistoryQueueType = {
 class RootDialog extends MyComponentDialog {
   readonly chatHistoryStateProperty = 'this.CHAT_HISTORY_PROPERTY';
   private _history: HistoryQueueType['events'] = {};
+  readonly dialogueManager: DialogueManager;
 
-  constructor (userState: BotState) {
+  constructor (userState: BotState, dialogueManager: DialogueManager) {
     super(ROOT_DIALOG);
+
+    this.dialogueManager = dialogueManager;
+
+    for (const dialog of this.dialogueManager.getDialogs()) {
+      this.addDialog(dialog);
+    }
 
     this.initializeUserProfile(userState);
 
     this.addDialog(new TextPrompt(TEXT_PROMPT));
-    this.addDialog(new AgentAsDialog(userState));
-    this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
-      this.initialStep.bind(this),
+
+    this.addDialog(new WaterfallDialog(MAIN_LOOP, [
+      this.startingStep.bind(this),
       this.sayThenListenStep.bind(this),
-      this.finalStep.bind(this)
+      this.loopingStep.bind(this)
     ]));
 
-    this.initialDialogId = WATERFALL_DIALOG;
+    this.initialDialogId = MAIN_LOOP;
   }
 
   /**
@@ -74,9 +80,12 @@ class RootDialog extends MyComponentDialog {
     }
   }
 
-  async initialStep (stepContext: WaterfallStepContext): Promise<DialogTurnResult> {
-    console.log('[DEBUG] initialStep.')
-    return await stepContext.beginDialog(AGENT_AS_DIALOG);
+  async startingStep (stepContext: WaterfallStepContext): Promise<DialogTurnResult> {
+    console.log('[DEBUG] startingStep.')
+
+    const actingDialogId = this.dialogueManager.decideActingDialog();
+
+    return await stepContext.beginDialog(actingDialogId);
   }
 
   async sayThenListenStep (stepContext: WaterfallStepContext) {
@@ -87,8 +96,8 @@ class RootDialog extends MyComponentDialog {
     return await stepContext.prompt(TEXT_PROMPT, promptOptions);
   }
 
-  async finalStep (stepContext: WaterfallStepContext) {
-    return await stepContext.replaceDialog(WATERFALL_DIALOG);
+  async loopingStep (stepContext: WaterfallStepContext) {
+    return await stepContext.replaceDialog(MAIN_LOOP);
   }
 
   public initializeHistory (): HistoryQueueType {
