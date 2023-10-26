@@ -81,15 +81,13 @@ class RootDialog extends MyComponentDialog {
   }
 
   async startingStep (stepContext: WaterfallStepContext): Promise<DialogTurnResult> {
-    console.log('[DEBUG] startingStep.')
+    this.dialogueManager.decideActingDialog();
+    const actingDialog = this.dialogueManager.getActingDialog();
 
-    const actingDialogId = this.dialogueManager.decideActingDialog();
-
-    return await stepContext.beginDialog(actingDialogId);
+    return await stepContext.beginDialog(actingDialog.id);
   }
 
   async sayThenListenStep (stepContext: WaterfallStepContext) {
-    console.log('[DEBUG] sayThenListenStep.')
     const promptOptions = { prompt: stepContext.result };
 
     // Ask the user to enter their name.
