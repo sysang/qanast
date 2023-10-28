@@ -65,15 +65,18 @@ describe('DialogBot + DialogueManager + RootDialog', () => {
     const { client, dialogBot } = initilizeClient();
     await client.sendActivity('hello');
     await client.sendActivity('test');
+    await client.sendActivity('hi');
     const history = dialogBot.rootDialog.dialogs.getHistory();
 
     const actual = {
       '0': { role: 'user', text: 'hello' },
       '1': { role: 'bot', text: SIMPLE_DIALOG_STEP_MESSAGE},
       '2': { role: 'user', text: 'test' },
-      '3': { role: 'bot', text: SIMPLE_DIALOG_STEP_RESULT }
+      '3': { role: 'bot', text: SIMPLE_DIALOG_STEP_RESULT },
+      '4': { role: 'user', text: 'hi' },
+      '5': { role: 'bot', text: SIMPLE_DIALOG_STEP_MESSAGE }
     }
-    expect(Object.keys(history).length).toBe(4);
+    expect(Object.keys(history).length).toBe(6);
     expect(history).toStrictEqual(actual);
   });
 });
