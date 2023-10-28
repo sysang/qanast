@@ -4,13 +4,13 @@ import {
   type TurnContext
 } from 'botbuilder-core';
 
-import { USER_PROFILE_PROPERTY } from './constants';
-
 export type UserProfile = {
   name: string | '';
   age: number | -1;
   companiesToReview: string[];
 }
+
+export const USER_PROFILE_PROPERTY = 'USER_PROFILE_PROPERTY';
 
 export class UserDataBinder<T> {
   readonly access_property = USER_PROFILE_PROPERTY;
