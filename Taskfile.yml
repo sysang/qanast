@@ -5,11 +5,11 @@ tasks:
     cmds:
       - xh http://localhost:7700/indexes
 
-  run_build_bot:
+  build_bot:
     cmds:
       - docker exec -it -u tiger ailab zsh -c "source ~/.zshrc && cd /workspace/qna-assistant && npm run build"
 
-  run_dev_bot:
+  start_dev_bot:
     cmds:
       - docker exec -it -u tiger ailab zsh -c "source ~/.zshrc && cd /workspace/qna-assistant && npm run dev"
 
