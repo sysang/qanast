@@ -80,8 +80,7 @@ export class DialogBot extends ActivityHandler {
 
   private createOnMessageHandler (dialogueManager: DialogueManager): BotHandler {
     return async (turnContext: TurnContext, next: () => Promise<void>): Promise<any> => {
-      console.log('Running dialog with Message Activity.');
-
+      // console.log('Running dialog with Message Activity.');
       const dialogSet = new DialogSet(this.dialogStateAccessor);
       dialogSet.add(this.rootDialog);
       const dialogContext = await dialogSet.createContext(turnContext);

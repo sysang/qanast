@@ -13,27 +13,11 @@ const MAIN_LOOP = 'MAIN_LOOP';
 const TEXT_PROMPT = 'TEXT_PROMPT';
 
 class RootDialog extends ComponentDialog {
-  // readonly chatHistoryStateProperty = 'CHAT_HISTORY_PROPERTY';
-  // readonly _historyAccessor: StatePropertyAccessor<HistoryQueueType>;
-  // readonly dialogueManager: DialogueManager;
-  // private _history: HistoryQueueType['events'] = {};
-  // readonly _conversationState: BotState;
+  readonly dialogs: DialogueManager;
 
   constructor (dialogueManager: DialogueManager) {
     super(ROOT_DIALOG);
 
-    // this._conversationState = conversationState;
-
-    // this._historyAccessor = conversationState.createProperty<HistoryQueueType>(this.chatHistoryStateProperty);
-
-    // this.dialogueManager = dialogueManager;
-
-    // for (const dialog of this.dialogueManager.getDialogs()) {
-    //   this.addDialog(dialog);
-    // }
-
-    // this.initializeUserProfile(userState);
-    // @ts-expect-error
     this.dialogs = dialogueManager;
 
     this.addDialog(new TextPrompt(TEXT_PROMPT));
@@ -46,28 +30,6 @@ class RootDialog extends ComponentDialog {
 
     this.initialDialogId = MAIN_LOOP;
   }
-
-  /**
-    * The run method handles the incoming activity (in the form of a TurnContext) 
-    *  and passes it through the dialog system.
-    * If no dialog is active, it will start the default dialog.
-    * @param {*} turnContext
-    * @param {*} accessor
-    */
-  // async run (turnContext: TurnContext, dialogStateAccessor: StatePropertyAccessor) {
-  //   const dialogSet = new DialogSet(dialogStateAccessor);
-  //   dialogSet.add(this);
-  //   const dialogContext = await dialogSet.createContext(turnContext);
-
-  //   await this.enqueueUserEvent(turnContext);
-
-  //   dialogContext.context.onSendActivities(this.bindEnqueueEventOnSendActivities(turnContext));
-
-  //   const results = await dialogContext.continueDialog();
-  //   if (results.status === DialogTurnStatus.empty) {
-  //     await dialogContext.beginDialog(this.id);
-  //   }
-  // }
 
   async startingStep (stepContext: WaterfallStepContext): Promise<DialogTurnResult> {
     // @ts-expect-error
