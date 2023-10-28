@@ -70,7 +70,6 @@ class RootDialog extends ComponentDialog {
   // }
 
   async startingStep (stepContext: WaterfallStepContext): Promise<DialogTurnResult> {
-    console.log(stepContext.dialogs);
     // @ts-expect-error
     const actingDialog = stepContext.dialogs.getActingDialog();
     return await stepContext.beginDialog(actingDialog.id);

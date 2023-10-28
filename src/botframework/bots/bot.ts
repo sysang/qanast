@@ -8,7 +8,7 @@ import {
   type TurnContext,
   UserState
 } from 'botbuilder-core';
-import { DialogSet, DialogTurnStatus } from 'botbuilder-dialogs';
+import { type ComponentDialog, DialogContext, DialogSet, DialogTurnStatus } from 'botbuilder-dialogs';
 
 import DialogueManager from './dialogue-manager';
 import RootDialog from '../dialogs/root-dialog';
@@ -16,14 +16,14 @@ import { AgentAsDialog } from '../dialogs/agentAsDialog';
 
 const DIALOG_STATE_PROPERTY = 'DIALOG_STATE_PROPERTY';
 
-const createBot = (storage: Storage): DialogBot => {
+const createBot = (storage: Storage, dialogs?: ComponentDialog[]): DialogBot => {
   // Create user and conversation state with in-memory storage provider.
   const conversationState = new ConversationState(storage);
   const userState = new UserState(storage);
 
   // Create the main dialog.
-  const dialogs = [new AgentAsDialog()];
-  const dialogueManager = new DialogueManager( conversationState, userState, dialogs);
+  const _dialogs = dialogs !== undefined ? dialogs : [new AgentAsDialog()];
+  const dialogueManager = new DialogueManager(conversationState, userState, _dialogs);
 
   const rootDialog = new RootDialog(dialogueManager);
 
@@ -82,16 +82,13 @@ export class DialogBot extends ActivityHandler {
     return async (turnContext: TurnContext, next: () => Promise<void>): Promise<any> => {
       console.log('Running dialog with Message Activity.');
 
-      // Run the Dialog with the new message Activity.
-      // await dialog.run(context, dialogStateAccessor);
-
       const dialogSet = new DialogSet(this.dialogStateAccessor);
       dialogSet.add(this.rootDialog);
       const dialogContext = await dialogSet.createContext(turnContext);
 
       await dialogueManager.enqueueUserEvent(turnContext);
 
-      dialogContext.context.onSendActivities(dialogueManager.bindEnqueueEventOnSendActivities(turnContext));
+      dialogueManager.bindEnqueueEventOnSendActivities(dialogContext);
 
       const results = await dialogContext.continueDialog();
       if (results.status === DialogTurnStatus.empty) {

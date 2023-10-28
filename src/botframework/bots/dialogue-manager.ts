@@ -5,7 +5,7 @@ import {
   type StatePropertyAccessor,
   type TurnContext
 } from 'botbuilder-core';
-import { type ComponentDialog, DialogSet } from 'botbuilder-dialogs';
+import { type ComponentDialog, DialogContext, DialogSet } from 'botbuilder-dialogs';
 
 import type RootDialog from '../dialogs/root-dialog';
 
@@ -86,8 +86,6 @@ class DialogueManager extends DialogSet {
         { events, backIndex, frontIndex, historyLength });
     }
 
-    console.log('events: ', events);
-
     return events;
   }
 
@@ -126,18 +124,18 @@ class DialogueManager extends DialogSet {
     return this._history;
   }
 
-  public bindEnqueueEventOnSendActivities (turnContext: TurnContext): SendActivitiesHandler {
-    return async (context, activities, next) => {
+  public bindEnqueueEventOnSendActivities (dialogContext: DialogContext) {
+    dialogContext.context.onSendActivities(async (context, activities, next) => {
       for (const activity of activities) {
         if (activity.type !== ActivityTypes.Message || activity.text === undefined) {
           continue;
         }
 
-        await this.enqueueBotEvent(turnContext, activity.text);
+        await this.enqueueBotEvent(dialogContext.context, activity.text);
       }
 
       return await next();
-    }
+    });
   }
 }
 
