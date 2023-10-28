@@ -22,7 +22,7 @@ const createBot = (storage: Storage): MainBot => {
 
   // Create the main dialog.
   const dialogueManager = new DialogueManager([new AgentAsDialog(userState)]);
-  const rootDialog = new RootDialog(userState, dialogueManager);
+  const rootDialog = new RootDialog(conversationState, userState, dialogueManager);
   const mainBot = new MainBot(conversationState, userState, rootDialog);
 
   return mainBot;
