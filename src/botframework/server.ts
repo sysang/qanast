@@ -6,9 +6,9 @@ import restify, {
 import { type CloudAdapter } from 'botbuilder';
 import { type TurnContext } from 'botbuilder-core';
 
-import { type MainBot } from './bots/bot';
+import { type DialogBot } from './bots/bot';
 
-const createServer = async (bot: MainBot, adapter: CloudAdapter): Promise<Server> => {
+const createServer = async (bot: DialogBot, adapter: CloudAdapter): Promise<Server> => {
   // Create HTTP server
   const server = restify.createServer();
   server.use(restify.plugins.bodyParser());

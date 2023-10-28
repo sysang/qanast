@@ -1,17 +1,16 @@
 import { type BotState } from 'botbuilder-core';
 import {
+  ComponentDialog,
   WaterfallDialog,
   type WaterfallStepContext
 } from 'botbuilder-dialogs';
-
-import MyComponentDialog from './my-dialogs';
 
 export const AGENT_AS_DIALOG = 'AGENT_AS_DIALOG';
 
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 
-export class AgentAsDialog extends MyComponentDialog {
-  constructor (userState: BotState) {
+export class AgentAsDialog extends ComponentDialog {
+  constructor () {
     super(AGENT_AS_DIALOG);
 
     this.addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
