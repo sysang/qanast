@@ -1,10 +1,10 @@
 import { type Activity } from 'botframework-schema';
 import { TranscriptLoggerMiddleware } from 'botbuilder-core';
-import { MongoClient } from 'mongodb';
-import winston, { format, type Logger } from 'winston';
-require('winston-mongodb');
+import { type Logger } from 'pino';
 
-class WinstonTranscriptLogger {
+import { createTranscriptLogger } from '../logging/pino';
+
+class CustomTranscriptLogger {
   readonly logger: Logger;
 
   constructor (logger: Logger) {
@@ -17,31 +17,12 @@ class WinstonTranscriptLogger {
     * @param activity Activity being logged.
     */
   public logActivity (activity: Activity) {
-    this.logger.info(String(activity.id), { activity });
+    this.logger.info(activity);
   }
 }
 
 export const createTranscriptLoggerMiddleware = async () => {
-  const uri = 'mongodb://botframework:111@192.168.58.9:27017/botbuilder';
-  const mongoClient = new MongoClient(uri);
-  await mongoClient.connect();
-
-  const transportOptions = {
-    db: await Promise.resolve(mongoClient),
-    collection: 'transcript',
-    metaKey: 'activity'
-  };
-
-  const _format = format((info, opts) => {
-    return info;
-  });
-  const winsontLogger = winston.createLogger({
-    level: 'info',
-    format: _format()
-  });
-  // @ts-expect-error
-  winsontLogger.add(new winston.transports.MongoDB(transportOptions));
-  const logger = new WinstonTranscriptLogger(winsontLogger);
-
+  const _logger = await createTranscriptLogger();
+  const logger = new CustomTranscriptLogger(_logger);
   return new TranscriptLoggerMiddleware(logger);
 }
