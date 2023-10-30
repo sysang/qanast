@@ -1,4 +1,3 @@
-import { type BotState } from 'botbuilder-core';
 import {
   ComponentDialog,
   TextPrompt,
@@ -6,8 +5,9 @@ import {
   type WaterfallStepContext
 } from 'botbuilder-dialogs';
 
-export const AGENT_AS_DIALOG = 'AGENT_AS_DIALOG';
+import * as LanguageService from '../language-services';
 
+export const AGENT_AS_DIALOG = 'AGENT_AS_DIALOG';
 const TEXT_PROMPT = 'TEXT_PROMPT';
 const WATERFALL_DIALOG = 'WATERFALL_DIALOG';
 
@@ -25,12 +25,14 @@ export class AgentAsDialog extends ComponentDialog {
   }
 
   async message (stepContext: WaterfallStepContext) {
-    const options = { prompt: "Please enter your query." }
-    return await stepContext.beginDialog(TEXT_PROMPT, options );
+    const options = { prompt: 'Please enter your query.' }
+    return await stepContext.beginDialog(TEXT_PROMPT, options);
   }
 
   async queryLLM (stepContext: WaterfallStepContext) {
     // console.log('[DEBUG] queryLLM.')
-    return await stepContext.endDialog('large language model tokens');
+    const response = await LanguageService.completions('test');
+    const result = response.data?.choices?.[0]?.text;
+    return await stepContext.endDialog(result);
   }
 }

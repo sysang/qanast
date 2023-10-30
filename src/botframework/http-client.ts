@@ -22,14 +22,18 @@ const stringify = fastJson({
   required: []
 })
 
-const createAxiosClient = (): AxiosInstance => {
+const createAxiosClient = (baseURL?: string): AxiosInstance => {
   const defaultHeaders = {
     accept: 'application/json',
     'content-type': 'application/json'
   }
 
   const httpAgent = new Agent();
-  const client = axios.create({ httpAgent, headers: defaultHeaders });
+  const client = axios.create({
+    baseURL,
+    httpAgent,
+    headers: defaultHeaders
+  });
 
   client.interceptors.request.use(
     (config) => config,
