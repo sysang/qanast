@@ -1,20 +1,17 @@
 import { ActivityTypes } from 'botframework-schema';
 import {
   type BotState,
-  type SendActivitiesHandler,
   type StatePropertyAccessor,
   type TurnContext
 } from 'botbuilder-core';
-import { type ComponentDialog, DialogContext, DialogSet } from 'botbuilder-dialogs';
+import { type ComponentDialog, type DialogContext, DialogSet } from 'botbuilder-dialogs';
 
-import type RootDialog from '../dialogs/root-dialog';
-
-type HistoryEventType = {
+export type HistoryEventType = {
   role: 'bot' | 'user';
   text: string;
 }
 
-type HistoryQueueType = {
+export type HistoryQueueType = {
   events: Record<number, HistoryEventType>;
   frontIndex: number;
   backIndex: number;
@@ -64,7 +61,7 @@ class DialogueManager extends DialogSet {
       events: {},
       frontIndex: 0,
       backIndex: 0,
-      historyLength: 20
+      historyLength: 10
     }
   }
 

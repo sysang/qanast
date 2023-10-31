@@ -1,17 +1,27 @@
 import { createAxiosClient } from '../http-client';
 import loadEnv from '../load-env';
+import { type HistoryQueueType } from '../bots/dialogue-manager';
 
-const composePrompt = (text: string) => {
-  const prompt = `[INST] <<SYS>>You are a helpful chatbot <</SYS>>
-Human: hi im bob
-AI:   Hello there, Bob! *adjusts glasses* It's nice to meet you. Is there something on your mind that you'd like to talk about or ask? I'm here to help with any questions or problems you might have.
-Human: please tell me my name
-AI:   Of course, Bob! *smiling* Your name is... Bob! 😊 Is there anything else you'd like to chat about or ask? I'm here to help with any questions or problems you might have.
-Human: [INST] what is large language model? [/INST]`;
-  return prompt;
+const composePrompt = (input: string, history: HistoryQueueType['events']) => {
+  const conversation = [
+    '[INST] <<SYS>>You are a helpful chatbot <</SYS>>[/INST]',
+  ]
+  const _history = Object.values(history);
+  for (const record of _history) {
+    if (record.role === 'bot') {
+      conversation.push(record.text);
+    } else {
+      conversation.push(`[INST] ${record.text} [/INST]`);
+    }
+  }
+  conversation.push(`[INST] ${input} [/INST]`);
+
+  return conversation.join('\n');
 }
 
-export default async function (text: string) {
+export default async function (input: string, history: HistoryQueueType['events']) {
+  const prompt = composePrompt(input, history);
+
   const { 
     LS_COMPLETION_ENDPOINT_URL: url,
     LS_COMPLETION_ENDPOINT_PORT: port,
@@ -21,7 +31,6 @@ export default async function (text: string) {
   const baseURL = `${scheme}://${url}:${port}`;
   const client = createAxiosClient(baseURL);
 
-  const prompt = composePrompt('test');
   const data = {
     'prompt': prompt,
     "stop": ["</s>"],
