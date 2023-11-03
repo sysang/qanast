@@ -1,3 +1,4 @@
 import completions from './completions';
+import translation from './translation';
 
-export { completions }
+export { completions, translation }

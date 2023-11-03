@@ -25,9 +25,12 @@ export class AgentAsDialog<O extends DialogContextOptions> extends ComponentDial
   }
 
   async queryLLM (stepContext: WaterfallStepContext<O>) {
-    const response = await LanguageService.completions(
-      stepContext.context.activity.text, stepContext.options.history);
-    const result = response.data?.choices?.[0]?.text;
+    const userMessage = stepContext.context.activity.text
+    // console.debug("[DEBUG] queryLLM -> userMessage:", userMessage);
+    const result = await LanguageService.completions(userMessage, stepContext.options.history);
+    // console.debug("[DEBUG] queryLLM -> result:", result);
+    // const viTranlated = await LanguageService.translation(result, "en", "vi");
+    // console.debug("[DEBUG] queryLLM -> viTranlated:", viTranlated);
     return await stepContext.endDialog(result);
   }
 }

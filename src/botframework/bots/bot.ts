@@ -8,7 +8,7 @@ import {
   type TurnContext,
   UserState
 } from 'botbuilder-core';
-import { type ComponentDialog, DialogContext, DialogSet, DialogTurnStatus } from 'botbuilder-dialogs';
+import { type ComponentDialog, DialogSet, DialogTurnStatus } from 'botbuilder-dialogs';
 
 import DialogueManager from './dialogue-manager';
 import RootDialog from '../dialogs/root-dialog';

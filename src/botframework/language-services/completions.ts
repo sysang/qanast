@@ -37,5 +37,7 @@ export default async function (input: string, history: HistoryQueueType['events'
     "max_tokens": 500
   }
 
-  return client.post(path, data)
+  const response = await client.post(path, data)
+
+  return response.data?.choices?.[0]?.text;
 }
