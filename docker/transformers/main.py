@@ -1,13 +1,15 @@
+import re
 from typing import Union
 
-from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 from cachetools import cached, TTLCache
 
-model = M2M100ForConditionalGeneration.from_pretrained("facebook/m2m100_418M")
-tokenizer = M2M100Tokenizer.from_pretrained("facebook/m2m100_418M")
+model_name = "VietAI/envit5-translation"
+tokenizer = AutoTokenizer.from_pretrained(model_name)  
+model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
 class Params(BaseModel):
     src_text: str
@@ -16,12 +18,24 @@ class Params(BaseModel):
 
 @cached(cache=TTLCache(maxsize=1024, ttl=20))
 def translate(src_text, src_lang, tgt_lang):
-    tokenizer.src_lang = src_lang
-    encoded = tokenizer(src_text, return_tensors="pt")
-    generated_tokens = model.generate(**encoded, forced_bos_token_id=tokenizer.get_lang_id(tgt_lang))
-    generated = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+    inputs = [
+        f"{src_lang}: {src_text}"
+    ]
+    outputs = model.generate(tokenizer(
+        inputs, return_tensors="pt", padding=True).input_ids.to('cpu'), max_length=2048)
 
-    return generated[0]
+    decoded = tokenizer.batch_decode(outputs, skip_special_tokens=True);
+
+    if len(decoded) == 0:
+        return src_text
+
+    regx = re.compile(r"(?:vi|en)\:\s(.+)")
+    matched = regx.fullmatch(decoded[0]);
+
+    if matched is None:
+        return src_text
+
+    return matched.groups()[0];
 
 app = FastAPI()
 
