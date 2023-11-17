@@ -2,9 +2,10 @@ import { MongoClient } from 'mongodb';
 import loadEnv from '../load-env';
 
 const connectDb = async () => {
-  const { MONGODB_CONNECTION, MONGODB_DATABASE } = loadEnv();
+  const { MONGODB_CONNECTION, MONGODB_DATABASE, MONGODB_REPLICA_SET } = loadEnv();
+  console.log(`${MONGODB_CONNECTION}/${MONGODB_DATABASE}/?replicaSet=${MONGODB_REPLICA_SET}`);
   const mongoClient = new MongoClient(
-    `${MONGODB_CONNECTION}/${MONGODB_DATABASE}`, { maxPoolSize: 100 });
+    `${MONGODB_CONNECTION}/${MONGODB_DATABASE}?replicaSet=${MONGODB_REPLICA_SET}`, { maxPoolSize: 100 });
   await mongoClient.connect();
 
   return mongoClient;

@@ -13,6 +13,7 @@ import { type ComponentDialog, DialogSet, DialogTurnStatus } from 'botbuilder-di
 import DialogueManager from './dialogue-manager';
 import RootDialog from '../dialogs/root-dialog';
 import { AgentAsDialog } from '../dialogs/agentAsDialog';
+import { memoryUsage } from 'node:process';
 
 const DIALOG_STATE_PROPERTY = 'DIALOG_STATE_PROPERTY';
 
@@ -80,7 +81,7 @@ export class DialogBot extends ActivityHandler {
 
   private createOnMessageHandler (dialogueManager: DialogueManager): BotHandler {
     return async (turnContext: TurnContext, next: () => Promise<void>): Promise<any> => {
-      // console.log('Running dialog with Message Activity.');
+      console.debug('Running dialog with Message Activity.');
       const dialogSet = new DialogSet(this.dialogStateAccessor);
       dialogSet.add(this.rootDialog);
       const dialogContext = await dialogSet.createContext(turnContext);
@@ -102,12 +103,11 @@ export class DialogBot extends ActivityHandler {
   private createOnMemberAddedHandler (): BotHandler {
     return async (context: TurnContext, next: () => Promise<void>): Promise<any> => {
       const membersAdded = context.activity.membersAdded;
+      console.debug('[DEBUG] createOnMemberAddedHandler -> membersAdded: ', membersAdded);
       if (Array.isArray(membersAdded)) {
         for (let cnt = 0; cnt < membersAdded.length; cnt++) {
           if (membersAdded[cnt].id !== context.activity.recipient.id) {
-            const reply = `Welcome to Complex Dialog Bot ${membersAdded[cnt].name}. 
-              This bot provides a complex conversation, with multiple dialogs. Type 
-              anything to get started.`;
+            const reply = 'Hi, I\'m virtual assistant. I\'m very please to support you.';
             await context.sendActivity(reply);
           }
         }

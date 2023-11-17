@@ -4,6 +4,7 @@ import { z } from 'zod';
 const EnvConfig = z.object({
   BF_SERVER_PORT: z.string(),
   MONGODB_CONNECTION: z.string(),
+  MONGODB_REPLICA_SET: z.string(),
   MONGODB_DATABASE: z.string(),
   LS_COMPLETION_ENDPOINT_URL: z.string(),
   LS_COMPLETION_ENDPOINT_PORT: z.string(),
