@@ -5,9 +5,16 @@ tasks:
     cmds:
       - xh http://localhost:7700/indexes
 
-  llm3:
+  llama-2-7b-chat:
     cmds:
       - docker exec -d llm3 zsh -c '/usr/bin/python3 -m llama_cpp.server --port 3000 --host "0.0.0.0" --model /models/llama-2-7b-chat.ggmlv3.q3_K_L.gguf --n_gpu_layers 35'
+
+  llama-2-13b-chat:
+    cmds:
+      - docker exec -d llm3 zsh -c '/usr/bin/python3 -m llama_cpp.server --port 3000 --host "0.0.0.0" --model /models/llama-2-13b-chat.ggmlv3.q2_K --n_gpu_layers 35'
+  llama-2-7b:
+    cmds:
+      - docker exec -d llm3 zsh -c '/usr/bin/python3 -m llama_cpp.server --port 3000 --host "0.0.0.0" --model /models/llama-2-7b.Q5_K_M.gguf --n_gpu_layers 35'
 
   translation:
     cmds:

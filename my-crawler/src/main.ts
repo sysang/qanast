@@ -24,7 +24,7 @@ async function main(){
       requestHandlerTimeoutSecs: 30,
 
       // Limit to 10 requests per one crawl
-      // maxRequestsPerCrawl: 10,
+      maxRequestsPerCrawl: 10,
 
       // This function will be called for each URL to crawl.
       // It accepts a single parameter, which is an object with options as:

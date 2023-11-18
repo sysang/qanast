@@ -17,7 +17,7 @@ import requests
 ```
 
 ```python
-prompt = "<s>[INST] <<SYS>>\n You are a helpful, respectful and honest assistant. Your answer is always as concise as possible, while being informative, sufficient. Please ensure that your responses are truthful, inspiring, positive. Please do not response to question thas is inappropriate or contradictory. If you don't know the answer to a question, please don't share false information\n<</SYS>>\n\n Describe 10 funcdamental steps to build a ecoomerce website [/INST]"
+prompt = "<s>[INST] <<SYS>>\n You are a helpful, respectful and honest assistant. Your answer is always as concise as possible, while being informative, sufficient. Please ensure that your responses are truthful, inspiring, positive. Please do not response to question thas is inappropriate or contradictory. If you don't know the answer to a question, please don't share false information\n<</SYS>>\n\n Describe 10 fundamental steps to build a ecoomerce website [/INST]"
 headers = { 'Content-Type' : 'application/json' }
 data = {
     'prompt': prompt,
