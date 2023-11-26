@@ -1,0 +1,105 @@
+import { createAxiosClient } from '../http-client';
+import loadEnv from '../load-env';
+import { type HistoryQueueType } from '../bots/dialogue-manager';
+
+const composeCompletionPrompt = (input: string, history: HistoryQueueType['events']) => {
+  const turns = [];
+  for (const record of Object.values(history)) {
+    if (record.role === 'bot') {
+      turns.push(`  [assistant] ${record.text}`);
+    } else {
+      turns.push(`  [user] ${record.text}`);
+    }
+  }
+  const chatHistory = turns.join('\n');
+
+  const text = `<s>[INST] <<SYS>>
+JOB DESCRIPTION: Work as an experienced, professional CUSTOMER SUPPORT staff for \
+online grocery store. I will give you a discussion with user who visists our website \
+then have various questions related to exibited products. Together, you and I will \
+support visitors to retrieve information of any product available on our website. \
+The usual kind of information includes but not limited to availability, description, \
+brand, price, product name. <</SYS>>
+
+ACT CODES:
+  [ACT001] compose message to wellcome user
+  [ACT004] compose message to say goodbye to user
+  [ACT020] compose message to show gratitude to user
+  [ACT031] request api to search for product details
+  [ACT090] compose message to inform that user's inquire is out of scope
+CONVERSATION HISTORY:
+${chatHistory}
+GUIDELINE: If last user's message is out of scope user ACT090. If both named entity and \
+recognized are recognized confidently and intent is about query then perform request api \
+to search for product details. Please write your report in a SHORT, BRIEF, and STRUCTURED \
+form. DO NOT add or make up text before or after. Please using ACT CODE to denote the suggest \
+action. Create your report in below template:
+  # Keywords: regconise keywords in last user message
+  # Entities: recognize named entities such as product name, or product category, or brand name
+  # Scope: recognize scope of last user message, if user's inquiry not about COSMETICS, \
+FOOD, HOUSEWARE, PERSONAL CARE it should be recognized as out of scope. 
+  # Intent: recognize intent of last user message
+  # Analysis: recognize which information is critical to take action
+  # Action: reason to infer appropriate action, use ACT CODE to denote the suggested action.
+  # Message: compose message to reply last last message 
+Consider last user's message, what is keywords, what are entities, what is scope, what is intent? \
+Consider whole conversation, what is analysis, what is next action, what is reply message?[/INST]`
+
+  return text;
+}
+
+const completions = async (input: string, history: HistoryQueueType['events']) => {
+  const prompt = composeCompletionPrompt(input, history);
+  console.debug('[DEBUG] completions -> prompt: ', prompt);
+
+  const {
+    LS_COMPLETION_ENDPOINT_URL: url,
+    LS_COMPLETION_ENDPOINT_PORT: port,
+    LS_COMPLETION_ENDPOINT_SCHEME: scheme
+  } = loadEnv();
+  const path = 'v1/completions'
+  const baseURL = `${scheme}://${url}:${port}`;
+  const client = createAxiosClient(baseURL);
+
+  const data = {
+    prompt,
+    stop: ['</s>'],
+    max_tokens: 1000,
+    temperature: 0.1,
+    top_p: 0.95,
+    top_k: 19
+  }
+
+  const response = await client.post(path, data)
+  const result = response.data?.choices?.[0]?.text;
+  console.debug('[DEBUG] completions -> result:', result);
+
+  return parseCompletionResult(result);
+}
+
+const parseSection = (re: RegExp, text: string) => {
+  const matched = re.exec(text);
+
+  return matched === null ? '' : matched[1]
+}
+
+const parseCompletionResult = (text: string) => {
+  const result = {
+    'Keywords': parseSection(/^#\sKeywords:\s(.+)$/gm, text),
+    'Entities': parseSection(/^#\sEntities:\s(.+)$/mg, text),
+    'Scope': parseSection(/^#\sScope:\s(.+)$/mg, text),
+    'Intent': parseSection(/^#\sIntent:\s(.+)$/mg, text),
+    'Analysis': parseSection(/^#\sAnalysis:\s(.+)$/mg, text),
+    'Action': parseSection(/^#\sAction:\s(.+)$/mg, text),
+    'Message': ''
+  };
+
+  let messageResponse = parseSection(/^#\sMessage:\s"(.+)"$/mg, text);
+  messageResponse = messageResponse ?? parseSection(/^#\sMessage:\s(.+)$/mg, text);
+  result['Message'] = messageResponse;
+
+  return result;
+}
+
+export default completions;
+export { parseCompletionResult };

@@ -27,6 +27,7 @@ export class AgentAsDialog<O extends DialogContextOptions> extends ComponentDial
   async queryLLM (stepContext: WaterfallStepContext<O>) {
     const userMessage = stepContext.context.activity.text
     const result = await LanguageService.completions(userMessage, stepContext.options.history);
-    return await stepContext.endDialog(result);
+    console.debug("[DEBUG] queryLLM -> result:", result);
+    return await stepContext.endDialog(result['Message/Response']);
   }
 }

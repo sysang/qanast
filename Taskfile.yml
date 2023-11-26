@@ -7,14 +7,21 @@ tasks:
 
   llama-2-7b-chat:
     cmds:
-      - docker exec -d llm3 zsh -c '/usr/bin/python3 -m llama_cpp.server --port 3000 --host "0.0.0.0" --model /models/llama-2-7b-chat.ggmlv3.q3_K_L.gguf --n_gpu_layers 35'
+      - docker exec -d llm3 zsh -c '/usr/bin/python3 -m llama_cpp.server --port 3000 --host "0.0.0.0" --model /models/llama-2-7b-chat.Q5_K_M.gguf --n_gpu_layers 35'
 
   llama-2-13b-chat:
     cmds:
       - docker exec -d llm3 zsh -c '/usr/bin/python3 -m llama_cpp.server --port 3000 --host "0.0.0.0" --model /models/llama-2-13b-chat.ggmlv3.q2_K --n_gpu_layers 35'
+
   llama-2-7b:
     cmds:
       - docker exec -d llm3 zsh -c '/usr/bin/python3 -m llama_cpp.server --port 3000 --host "0.0.0.0" --model /models/llama-2-7b.Q5_K_M.gguf --n_gpu_layers 35'
+
+  mongo_hosts:
+    cmds:
+      - docker exec -it -u root ailab zsh -c "echo '192.168.58.9 mongo1' >> /etc/hosts"
+      - docker exec -it -u root ailab zsh -c "echo '192.168.58.9 mongo2' >> /etc/hosts"
+      - docker exec -it -u root ailab zsh -c "echo '192.168.58.9 mongo3' >> /etc/hosts"
 
   translation:
     cmds:
@@ -24,7 +31,7 @@ tasks:
     cmds:
       - docker exec -it -u tiger ailab zsh -c "source ~/.zshrc && cd /workspace/qna-assistant && npm run build"
 
-  start_dev_bot:
+  start_dev:
     cmds:
       - docker exec -it -u tiger ailab zsh -c "source ~/.zshrc && cd /workspace/qna-assistant && npm run dev"
 
