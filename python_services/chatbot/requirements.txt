@@ -1,0 +1,1 @@
+propan[async-rabbit]==0.1.5.24

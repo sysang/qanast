@@ -5,7 +5,7 @@ import { type HistoryQueueType } from '../bots/dialogue-manager';
 const composeCompletionPrompt = (input: string, history: HistoryQueueType['events']) => {
   const turns = [];
   for (const record of Object.values(history)) {
-    if (record.role === 'bot') {
+    if (record.role === 'assistant') {
       turns.push(`  [assistant]: ${record.text}`);
     } else {
       turns.push(`  [user]: ${record.text}`);

@@ -7,7 +7,7 @@ import {
 import { type ComponentDialog, type DialogContext, DialogSet } from 'botbuilder-dialogs';
 
 export type HistoryEventType = {
-  role: 'bot' | 'user';
+  role: 'assistant' | 'user';
   text: string;
 }
 
@@ -101,7 +101,7 @@ class DialogueManager extends DialogSet {
     const events = await this.enqueueEvent(
       turnContext,
       {
-        role: 'bot',
+        role: 'assistant',
         text
       }
     );

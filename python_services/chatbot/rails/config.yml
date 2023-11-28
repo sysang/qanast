@@ -1,0 +1,6 @@
+models:
+  - type: main
+    engine: my_llama2
+    parameters:
+      temperature: 0.95
+    

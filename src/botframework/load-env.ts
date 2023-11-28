@@ -12,6 +12,9 @@ const EnvConfig = z.object({
   LS_TRANSLATION_ENDPOINT_URL: z.string(),
   LS_TRANSLATION_ENDPOINT_PORT: z.string(),
   LS_TRANSLATION_ENDPOINT_SCHEME: z.union([z.literal('http'), z.literal('https')]),
+  RAILS_TRANSLATION_ENDPOINT_URL: z.string(),
+  RAILS_TRANSLATION_ENDPOINT_PORT: z.string(),
+  RAILS_TRANSLATION_ENDPOINT_SCHEME: z.union([z.literal('http'), z.literal('https')]),
 });
 
 export type EnvConfigType = z.infer<typeof EnvConfig>;

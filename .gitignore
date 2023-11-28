@@ -16,6 +16,7 @@ mongodb_data/
 python_services/examples/
 my-crawler/examples/
 etc/chiir21_naturallanguagequeries/
+**/custom_llms.egg-info/
 
 movies.json
 
