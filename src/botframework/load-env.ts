@@ -6,15 +6,13 @@ const EnvConfig = z.object({
   MONGODB_CONNECTION: z.string(),
   MONGODB_REPLICA_SET: z.string(),
   MONGODB_DATABASE: z.string(),
+  RABBITMQ_SERVER_ENDPOINT_URL: z.string(),
   LS_COMPLETION_ENDPOINT_URL: z.string(),
   LS_COMPLETION_ENDPOINT_PORT: z.string(),
   LS_COMPLETION_ENDPOINT_SCHEME: z.union([z.literal('http'), z.literal('https')]),
   LS_TRANSLATION_ENDPOINT_URL: z.string(),
   LS_TRANSLATION_ENDPOINT_PORT: z.string(),
-  LS_TRANSLATION_ENDPOINT_SCHEME: z.union([z.literal('http'), z.literal('https')]),
-  RAILS_TRANSLATION_ENDPOINT_URL: z.string(),
-  RAILS_TRANSLATION_ENDPOINT_PORT: z.string(),
-  RAILS_TRANSLATION_ENDPOINT_SCHEME: z.union([z.literal('http'), z.literal('https')]),
+  LS_TRANSLATION_ENDPOINT_SCHEME: z.union([z.literal('http'), z.literal('https')])
 });
 
 export type EnvConfigType = z.infer<typeof EnvConfig>;

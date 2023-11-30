@@ -1,27 +1,68 @@
 import { type HistoryQueueType } from '../bots/dialogue-manager';
 
+import { getClient } from '../rabbitmq-client';
+
+const sendToLlama2Chat = async(data) => {
+  const client = await getClient();
+  const queueName = 'llama2_chat';
+
+  return Promise((resolve, reject) => {
+    client.createChannel(function(error1, channel) {
+      if (error1) {
+        reject(error1);
+      }
+      channel.assertQueue(queueName, {
+        exclusive: false,
+        durable: false
+      }, function(error2, q) {
+        if (error2) {
+          reject(error2);
+        }
+        const correlationId = uuidv4();
+
+        console.log(` [x] Requesting ${queueName}`);
+
+        channel.consume(q.queue, function(msg) {
+          if (msg.properties.correlationId == correlationId) {
+            console.log(' [.] Got %s', msg.content.toString());
+            setTimeout(function() {
+              channel.close();
+            }, 100);
+          }
+        }, {
+          noAck: true
+        });
+
+        channel.sendToQueue(
+          queueName,
+          Buffer.from(data.toString()),
+          {
+            correlationId: correlationId,
+            replyTo: q.queue 
+          });
+
+          setTimeout(function() {
+            channel.close();
+            reject(new Error('AMQ request timeout.'));
+          }, 10000);
+      });
+    });
+  })
+}
+
 const completions = async (input: string, history: HistoryQueueType['events']) => {
-  const {
-    RAILS_COMPLETION_ENDPOINT_URL: url,
-    RAILS_COMPLETION_ENDPOINT_PORT: port,
-    RAILS_COMPLETION_ENDPOINT_SCHEME: scheme
-  } = loadEnv();
-  const path = 'v1/chat/completions'
-  const baseURL = `${scheme}://${url}:${port}`;
-  const client = createAxiosClient(baseURL);
 
-  const data = {
-    prompt,
-    stop: ['</s>'],
-    max_tokens: 1000,
-    temperature: 0.1,
-    top_p: 0.95,
-    top_k: 19
+  const turns = [];
+  for (const record of Object.values(history)) {
+    if (record.role === 'assistant') {
+      turns.push(`  [assistant]: ${record.text}`);
+    } else {
+      turns.push(`  [user]: ${record.text}`);
+    }
   }
+  const chatHistory = turns.join('\n');
 
-  const response = await client.post(path, data)
-  const result = response.data?.choices?.[0]?.text;
-  console.debug('[DEBUG] completions -> result:', result);
+  const response = await sendToLlama2Chat(chatHistory)
 
-  return parseCompletionResult(result);
+  return response;
 }
