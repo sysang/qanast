@@ -8,6 +8,7 @@ dist/
 __pycache__
 tags
 tmp/
+workplace/
 my-crawler/node_modules/
 my-crawler/storage/
 typesense-data/
