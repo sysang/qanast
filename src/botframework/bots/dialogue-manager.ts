@@ -6,13 +6,13 @@ import {
 } from 'botbuilder-core';
 import { type ComponentDialog, type DialogContext, DialogSet } from 'botbuilder-dialogs';
 
-export type HistoryEventType = {
+export type ConversationTurn = {
   role: 'assistant' | 'user';
-  text: string;
+  content: string;
 }
 
 export type HistoryQueueType = {
-  events: Record<number, HistoryEventType>;
+  events: Record<number, ConversationTurn>;
   frontIndex: number;
   backIndex: number;
   readonly historyLength: number;
@@ -65,7 +65,7 @@ class DialogueManager extends DialogSet {
     }
   }
 
-  public async enqueueEvent (turnContext: TurnContext, event: HistoryEventType) {
+  public async enqueueEvent (turnContext: TurnContext, event: ConversationTurn) {
     let { events, backIndex, frontIndex, historyLength } = await this.getChatHistoryState(turnContext);
     const _events: HistoryQueueType['events'] = {};
     events[backIndex] = event;
@@ -91,18 +91,18 @@ class DialogueManager extends DialogSet {
       turnContext,
       {
         role: 'user',
-        text: turnContext.activity.text
+        content: turnContext.activity.text
       }
     );
     this.setHistory(events);
   }
 
-  public async enqueueBotEvent (turnContext: TurnContext, text: string) {
+  public async enqueueBotEvent (turnContext: TurnContext, content: string) {
     const events = await this.enqueueEvent(
       turnContext,
       {
         role: 'assistant',
-        text
+        content
       }
     );
     this.setHistory(events);

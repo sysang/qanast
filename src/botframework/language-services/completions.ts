@@ -6,9 +6,9 @@ const composeCompletionPrompt = (input: string, history: HistoryQueueType['event
   const turns = [];
   for (const record of Object.values(history)) {
     if (record.role === 'assistant') {
-      turns.push(`  [assistant]: ${record.text}`);
+      turns.push(`  [assistant]: ${record.content}`);
     } else {
-      turns.push(`  [user]: ${record.text}`);
+      turns.push(`  [user]: ${record.content}`);
     }
   }
   const chatHistory = turns.join('\n');
@@ -93,7 +93,7 @@ const parseCompletionResult = (text: string) => {
 
   let messageResponse = parseSection(/^#\sMessage\/Response:\s"(.+)"$/mg, text);
   if (messageResponse === null) {
-    messageResponse = arseSection(/^#\sMessage\/Response:\s(.+)$/mg, text);
+    messageResponse = parseSection(/^#\sMessage\/Response:\s(.+)$/mg, text);
   }
   result['Message/Response'] = messageResponse;
 

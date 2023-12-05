@@ -12,11 +12,8 @@ rails = LLMRails(config)
 router = RabbitRouter()
 
 @router.handle("llama2_chat")
-async def llama2_chat(m: str, logger: Logger):
-    logger.info(m)
-    completion = await rails.generate_async(
-        messages=[{"role": "user", "content": "Hello world!"}]
-    )
+async def llama2_chat(messages: list, logger: Logger):
+    print('llama2_chat -> messages: ', messages);
+    completion = await rails.generate_async(messages=messages)
 
-    print("completion: ", completion)
     return completion

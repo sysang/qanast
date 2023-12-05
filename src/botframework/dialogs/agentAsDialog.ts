@@ -5,6 +5,7 @@ import {
   type WaterfallStepContext
 } from 'botbuilder-dialogs';
 
+import { type ConversationTurn } from '../bots/dialogue-manager';
 import * as LanguageService from '../language-services';
 import { type DialogContextOptions } from './types';
 
@@ -26,8 +27,8 @@ export class AgentAsDialog<O extends DialogContextOptions> extends ComponentDial
 
   async queryLLM (stepContext: WaterfallStepContext<O>) {
     const userMessage = stepContext.context.activity.text
-    const result = await LanguageService.completions(userMessage, stepContext.options.history);
-    console.debug("[DEBUG] queryLLM -> result:", result);
-    return await stepContext.endDialog(result['Message/Response']);
+    // TODO: verify if result has valid struture
+    const result = await LanguageService.completions(userMessage, stepContext.options.history) as ConversationTurn;
+    return await stepContext.endDialog(result.content);
   }
 }

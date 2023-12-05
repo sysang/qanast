@@ -1,15 +1,38 @@
 define user express greeting
-  "Hello"
-  "Hi"
-  "Wassup?"
+    "Hello"
+    "Hi"
+    "Wassup?"
 
-define flow greeting
-  user express greeting
-  bot express greeting
-  bot ask how are you
+define user ask about cookies
+    "Are you selling cookies?"
+    "Do you have cookies"
+    "I want to buy cookies"
+    "I'm looking for cookies"
+    "what kinds of cookies are there?"
+
+define user clarify interest about cookies
+    "I want coconut flavored cookies"
+    "I'm looking for crunchy butter biscuits"
+
+define user utter out-of-scope thing
+    "Who is Obama?" 
+    "How to build an e-commerce website?" 
+    "Please explain standartd model"
 
 define bot express greeting
-  "Hello World!"
+    "Hi, how can I help you?"
 
-define bot ask how are you
-  "How are you doing?"
+define bot ask to clarify query about cookies
+    "do you have specific taste in mind?"
+
+define bot inform out-of-scope
+    "Sorry, I wish I can help but I just know to answer your inquiry about our products"
+
+define flow greeting
+    user express greeting
+    bot express greeting
+
+define flow answer enquiry
+    user ask about cookies
+    bot ask to clarify query about cookies
+

@@ -27,10 +27,15 @@ class MyLamma2(LLM):
         api_url = 'http://192.168.58.9:3000/v1/completions'
         headers = { 'Content-Type' : 'application/json' }
 
+        print('[DEBUG] myllama2 -> prompt: ', prompt)
+
         data = {
             'prompt': prompt,
-            "stop": ["</s>"],
-            "max_tokens": max_tokens
+            'stop': ["</s>"],
+            'max_tokens': max_tokens,
+            'temperature': 0.1,
+            'top_p': 0.95,
+            'top_k': 19
         }
         r = requests.post(
             api_url,
@@ -39,5 +44,7 @@ class MyLamma2(LLM):
             timeout=1200)
 
         response_data = r.json()
+        print('[DEBUG] myllama2 -> response_data: ')
+        print(response_data)
 
         return response_data['choices'][0]['text']

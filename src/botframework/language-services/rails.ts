@@ -1,32 +1,35 @@
-import { type HistoryQueueType } from '../bots/dialogue-manager';
+import { v4 as uuidv4 } from 'uuid';
 
-import { getClient } from '../rabbitmq-client';
+import { type ConversationTurn, type HistoryQueueType } from '../bots/dialogue-manager';
+import { getClient } from '../rpc/rabbitmq';
 
-const sendToLlama2Chat = async(data) => {
+export const sendToLlama2Chat = async (data: Array<ConversationTurn>) => {
   const client = await getClient();
   const queueName = 'llama2_chat';
 
-  return Promise((resolve, reject) => {
-    client.createChannel(function(error1, channel) {
-      if (error1) {
+  return await new Promise((resolve, reject) => {
+    client.createChannel(function (error1, channel) {
+      if (error1 instanceof Error) {
         reject(error1);
       }
       channel.assertQueue(queueName, {
         exclusive: false,
         durable: false
-      }, function(error2, q) {
-        if (error2) {
+      }, function (error2, q) {
+        if (error2 instanceof Error) {
           reject(error2);
         }
         const correlationId = uuidv4();
 
         console.log(` [x] Requesting ${queueName}`);
 
-        channel.consume(q.queue, function(msg) {
-          if (msg.properties.correlationId == correlationId) {
-            console.log(' [.] Got %s', msg.content.toString());
-            setTimeout(function() {
-              channel.close();
+        channel.consume(q.queue, function (msg) {
+          if (msg?.properties.correlationId === correlationId) {
+            const content = msg.content.toString();
+            console.log(' [.] Got %s', content);
+            resolve(JSON.parse(content));
+            setTimeout(function () {
+              channel.close(() => {});
             }, 100);
           }
         }, {
@@ -35,34 +38,25 @@ const sendToLlama2Chat = async(data) => {
 
         channel.sendToQueue(
           queueName,
-          Buffer.from(data.toString()),
-          {
-            correlationId: correlationId,
-            replyTo: q.queue 
-          });
+          Buffer.from(JSON.stringify(data)),
+          { contentType: 'application/json', correlationId, replyTo: q.queue }
+        );
 
-          setTimeout(function() {
-            channel.close();
-            reject(new Error('AMQ request timeout.'));
-          }, 10000);
+        setTimeout(function () {
+          channel.close(() => {});
+          reject(new Error('AMQ request timeout.'));
+        }, 10 * 60 * 60 * 1000);
       });
     });
   })
 }
 
 const completions = async (input: string, history: HistoryQueueType['events']) => {
+  const chatHistory = Object.values(history);
 
-  const turns = [];
-  for (const record of Object.values(history)) {
-    if (record.role === 'assistant') {
-      turns.push(`  [assistant]: ${record.text}`);
-    } else {
-      turns.push(`  [user]: ${record.text}`);
-    }
-  }
-  const chatHistory = turns.join('\n');
-
-  const response = await sendToLlama2Chat(chatHistory)
+  const response = await sendToLlama2Chat(chatHistory);
 
   return response;
 }
+
+export default completions;
